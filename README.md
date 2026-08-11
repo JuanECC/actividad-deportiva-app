@@ -1,16 +1,35 @@
-# React + Vite
+# 🏃 Registro de Actividades Deportivas
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+[![React](https://img.shields.io/badge/React-18-61DAFB)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-4-646CFF)](https://vitejs.dev/)
 
-Currently, two official plugins are available:
+Aplicación web para registrar y dar seguimiento a actividades deportivas.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## ✨ Características
 
-## React Compiler
+- 📝 Registrar actividades (tipo, duración, distancia)
+- 📋 Listar actividades con diseño de tarjetas
+- 🗑️ Eliminar actividades con confirmación
+- 💾 Persistencia con localStorage
+- 📊 Estadísticas en tiempo real
+- 🎨 Animaciones CSS puras
+- 📱 Diseño responsive
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 Tecnologías
 
-## Expanding the Oxlint configuration
+- **React 18** - UI Library
+- **Vite** - Build Tool
+- **CSS Puro** - Estilos y animaciones
+- **localStorage** - Almacenamiento persistente
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## 📦 Instalación
+
+```bash
+# Clonar repositorio
+git clone https://github.com/JuanECC/actividad-deportiva-app.git
+
+# Instalar dependencias
+npm install
+
+# Iniciar servidor de desarrollo
+npm run dev
