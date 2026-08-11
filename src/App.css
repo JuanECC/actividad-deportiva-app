@@ -6,16 +6,14 @@
   min-height: 100vh;
 }
 
-/* Header */
 .app-header {
   text-align: center;
   margin-bottom: 3rem;
   padding: 2rem 1rem;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
   border-radius: 20px;
   color: white;
   box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
-  animation: fadeInDown 0.6s ease;
 }
 
 .app-header h1 {
@@ -28,26 +26,19 @@
   opacity: 0.9;
 }
 
-/* Secciones */
 section {
   background: white;
   padding: 1.5rem;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
-  transition: var(--transition);
-}
-
-section:hover {
-  box-shadow: var(--shadow-hover);
 }
 
 section h2 {
   margin-bottom: 1.5rem;
-  color: var(--text-primary);
+  color: #1a2332;
 }
 
-/* Formulario */
 .campo {
   margin-bottom: 1rem;
 }
@@ -56,7 +47,7 @@ section h2 {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: #4a5568;
 }
 
 .campo select,
@@ -66,45 +57,39 @@ section h2 {
   border: 2px solid #e2e8f0;
   border-radius: 8px;
   font-size: 1rem;
-  transition: var(--transition);
-  background: white;
+  transition: all 0.3s;
 }
 
 .campo select:focus,
 .campo input:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: #4CAF50;
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
 
 .btn-principal {
   width: 100%;
   padding: 0.75rem;
-  background: var(--primary);
+  background: #4CAF50;
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.3s;
 }
 
 .btn-principal:hover {
-  background: var(--primary-dark);
+  background: #388E3C;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-hover);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-.btn-principal:active {
-  transform: translateY(0);
-}
-
-/* Lista vacía */
 .lista-vacia {
   text-align: center;
   padding: 3rem 1rem;
-  color: var(--text-secondary);
+  color: #4a5568;
 }
 
 .lista-vacia span {
@@ -113,142 +98,16 @@ section h2 {
   margin-bottom: 1rem;
 }
 
-.lista-vacia p {
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
-}
-
-.lista-vacia small {
-  font-size: 0.9rem;
-  opacity: 0.7;
-}
-
-/* Tarjetas de actividades */
-.lista-actividades {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
-}
-
-.tarjeta-actividad {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: var(--radius);
-  padding: 1rem;
-  transition: var(--transition);
-  animation: slideUp 0.5s ease forwards;
-}
-
-.tarjeta-actividad:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-hover);
-}
-
-.tarjeta-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.tarjeta-emoji {
-  font-size: 1.5rem;
-}
-
-.tarjeta-tipo {
-  flex: 1;
-  font-weight: 600;
-  font-size: 1.1rem;
-  text-transform: capitalize;
-}
-
-.btn-eliminar {
-  background: none;
-  border: none;
-  color: #ccc;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: var(--transition);
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-}
-
-.btn-eliminar:hover {
-  color: var(--danger);
-  background: rgba(244, 67, 54, 0.1);
-  transform: scale(1.2);
-}
-
-.tarjeta-body {
-  display: flex;
-  gap: 1.5rem;
-  margin-bottom: 0.75rem;
-}
-
-.tarjeta-detalle {
-  display: flex;
-  flex-direction: column;
-}
-
-.tarjeta-detalle .etiqueta {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-}
-
-.tarjeta-detalle .valor {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.tarjeta-footer {
-  border-top: 1px solid #e2e8f0;
-  padding-top: 0.5rem;
-}
-
-.tarjeta-footer .fecha {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-}
-
-/* Animaciones */
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Responsive */
 @media (max-width: 768px) {
   .app {
     padding: 1rem;
   }
-
+  
   .app-header h1 {
     font-size: 1.8rem;
   }
-
+  
   section {
     padding: 1rem;
-  }
-
-  .lista-actividades {
-    grid-template-columns: 1fr;
   }
 }
