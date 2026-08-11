@@ -1,121 +1,88 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import React, { useState } from 'react'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [actividades, setActividades] = useState([])
+  const [nuevaActividad, setNuevaActividad] = useState({
+    tipo: 'correr',
+    duracion: '',
+    distancia: ''
+  })
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    console.log('Actividad a guardar:', nuevaActividad)
+    // TODO: Implementar guardado
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app">
+      <header className="app-header">
+        <h1>🏃 Registro de Actividades Deportivas</h1>
+        <p className="subtitle">Tu compañero de entrenamiento diario</p>
+      </header>
 
-      <div className="ticks"></div>
+      <main>
+        <section className="formulario-section">
+          <h2>📝 Registrar Actividad</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="campo">
+              <label htmlFor="tipo">Tipo de actividad:</label>
+              <select 
+                id="tipo"
+                value={nuevaActividad.tipo}
+                onChange={(e) => setNuevaActividad({...nuevaActividad, tipo: e.target.value})}
+              >
+                <option value="correr">🏃 Correr</option>
+                <option value="ciclismo">🚴 Ciclismo</option>
+                <option value="natacion">🏊 Natación</option>
+                <option value="pesas">🏋️ Pesas</option>
+              </select>
+            </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+            <div className="campo">
+              <label htmlFor="duracion">Duración (minutos):</label>
+              <input 
+                id="duracion"
+                type="number" 
+                placeholder="Ej: 30"
+                value={nuevaActividad.duracion}
+                onChange={(e) => setNuevaActividad({...nuevaActividad, duracion: e.target.value})}
+                required
+                min="1"
+              />
+            </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+            <div className="campo">
+              <label htmlFor="distancia">Distancia (km):</label>
+              <input 
+                id="distancia"
+                type="number" 
+                placeholder="Ej: 5.2"
+                value={nuevaActividad.distancia}
+                onChange={(e) => setNuevaActividad({...nuevaActividad, distancia: e.target.value})}
+                min="0"
+                step="0.1"
+              />
+            </div>
+
+            <button type="submit" className="btn-principal">
+              ➕ Agregar Actividad
+            </button>
+          </form>
+        </section>
+
+        <section className="actividades-section">
+          <h2>📋 Mis Actividades</h2>
+          <p>Actividades registradas: <strong>{actividades.length}</strong></p>
+          <div className="lista-vacia">
+            <span>🏋️</span>
+            <p>No hay actividades registradas</p>
+            <small>¡Agrega tu primera actividad!</small>
+          </div>
+        </section>
+      </main>
+    </div>
   )
 }
 
