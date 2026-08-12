@@ -63,5 +63,5 @@ npm install
 # 4. Iniciar servidor de desarrollo
 npm run dev
 
-# 5. Abrir en el navegador
+# 5. Abrir en el navegador.
 # http://localhost:5173
