@@ -1,121 +1,109 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import React, { useState } from 'react'
+import Sidebar from './components/Sidebar'
+import Topbar from './components/Topbar'
+import Scoreboard from './components/Scoreboard'
+import ActivityLog from './components/ActivityLog'
+import SideColumn from './components/SideColumn'
+import ModalRegistro from './components/ModalRegistro'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [actividades, setActividades] = useState([
+    {
+      id: 1,
+      tipo: 'run',
+      nombre: 'Carrera matutina — Parque Central',
+      fecha: new Date().toISOString(),
+      meta: 'Hoy · 06:42 a. m.',
+      distancia: '8.4',
+      duracion: '42:10',
+      ritmo: '5:01',
+      tag: 'Récord',
+      tagType: 'pr'
+    },
+    {
+      id: 2,
+      tipo: 'bike',
+      nombre: 'Rodaje suave — Ruta del río',
+      fecha: new Date(Date.now() - 86400000).toISOString(),
+      meta: 'Ayer · 05:15 p. m.',
+      distancia: '24.1',
+      duracion: '58:32',
+      ritmo: '24.7 km/h',
+      tag: 'Recuperación',
+      tagType: ''
+    },
+    {
+      id: 3,
+      tipo: 'swim',
+      nombre: 'Natación — Alberca municipal',
+      fecha: new Date(Date.now() - 172800000).toISOString(),
+      meta: 'Lun · 07:00 a. m.',
+      distancia: '1,800',
+      duracion: '38:00',
+      ritmo: '2:07 /100m',
+      tag: 'Técnica',
+      tagType: ''
+    },
+    {
+      id: 4,
+      tipo: 'strength',
+      nombre: 'Fuerza — Tren inferior',
+      fecha: new Date(Date.now() - 259200000).toISOString(),
+      meta: 'Dom · 06:30 p. m.',
+      distancia: '5 ejerc.',
+      duracion: '51:00',
+      ritmo: '4,200 kg',
+      tag: 'Volumen',
+      tagType: ''
+    },
+    {
+      id: 5,
+      tipo: 'run',
+      nombre: 'Intervalos — Pista atlética',
+      fecha: new Date(Date.now() - 345600000).toISOString(),
+      meta: 'Sáb · 08:10 a. m.',
+      distancia: '10.2',
+      duracion: '47:55',
+      ritmo: '4:41',
+      tag: 'Velocidad',
+      tagType: ''
+    }
+  ])
+
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // Función para agregar actividad
+  const agregarActividad = (nuevaActividad) => {
+    setActividades([nuevaActividad, ...actividades])
+  }
+
+  // Función para eliminar actividad
+  const eliminarActividad = (id) => {
+    setActividades(actividades.filter(act => act.id !== id))
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="app">
+      <Sidebar />
+      <main className="main">
+        <Topbar onRegistrar={() => setIsModalOpen(true)} />
+        <Scoreboard actividades={actividades} />
+        <div className="grid">
+          <ActivityLog 
+            actividades={actividades} 
+            onEliminar={eliminarActividad}
+          />
+          <SideColumn actividades={actividades} />
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      </main>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      <ModalRegistro 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onRegistrar={agregarActividad}
+      />
+    </div>
   )
 }
 
