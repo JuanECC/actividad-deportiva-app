@@ -4,10 +4,10 @@ import Topbar from './components/Topbar'
 import Scoreboard from './components/Scoreboard'
 import ActivityLog from './components/ActivityLog'
 import SideColumn from './components/SideColumn'
+import ModalRegistro from './components/ModalRegistro'
 import './App.css'
 
 function App() {
-  // Estado global de actividades
   const [actividades, setActividades] = useState([
     {
       id: 1,
@@ -25,7 +25,7 @@ function App() {
       id: 2,
       tipo: 'bike',
       nombre: 'Rodaje suave — Ruta del río',
-      fecha: new Date(Date.now() - 86400000).toISOString(), // ayer
+      fecha: new Date(Date.now() - 86400000).toISOString(),
       meta: 'Ayer · 05:15 p. m.',
       distancia: '24.1',
       duracion: '58:32',
@@ -37,7 +37,7 @@ function App() {
       id: 3,
       tipo: 'swim',
       nombre: 'Natación — Alberca municipal',
-      fecha: new Date(Date.now() - 172800000).toISOString(), // anteayer
+      fecha: new Date(Date.now() - 172800000).toISOString(),
       meta: 'Lun · 07:00 a. m.',
       distancia: '1,800',
       duracion: '38:00',
@@ -71,6 +71,8 @@ function App() {
     }
   ])
 
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
   // Función para agregar actividad
   const agregarActividad = (nuevaActividad) => {
     setActividades([nuevaActividad, ...actividades])
@@ -81,18 +83,11 @@ function App() {
     setActividades(actividades.filter(act => act.id !== id))
   }
 
-  // Función para actualizar actividad
-  const actualizarActividad = (id, datosActualizados) => {
-    setActividades(actividades.map(act => 
-      act.id === id ? { ...act, ...datosActualizados } : act
-    ))
-  }
-
   return (
     <div className="app">
       <Sidebar />
       <main className="main">
-        <Topbar onRegistrar={() => {}} />
+        <Topbar onRegistrar={() => setIsModalOpen(true)} />
         <Scoreboard actividades={actividades} />
         <div className="grid">
           <ActivityLog 
@@ -102,6 +97,12 @@ function App() {
           <SideColumn actividades={actividades} />
         </div>
       </main>
+
+      <ModalRegistro 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onRegistrar={agregarActividad}
+      />
     </div>
   )
 }
