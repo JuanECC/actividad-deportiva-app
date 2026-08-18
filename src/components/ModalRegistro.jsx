@@ -13,6 +13,8 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
   })
 
   const [errors, setErrors] = useState({})
+  const [guardando, setGuardando] = useState(false)
+  const [errorGuardado, setErrorGuardado] = useState('')
 
   // Tipos de actividad con sus emojis
   const tiposActividad = [
@@ -41,8 +43,11 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    // Resetear errores
+    setErrorGuardado('')
     
     // Validaciones
     const newErrors = {}
@@ -56,36 +61,43 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
       return
     }
 
-    // Crear objeto de actividad
+    // Crear objeto de actividad (sin id ni fecha, Firestore los genera)
     const nuevaActividad = {
-      id: Date.now(),
       tipo: formData.tipo,
-      nombre: formData.nombre,
+      nombre: formData.nombre.trim(),
       fecha: new Date().toISOString(),
       meta: `Hoy · ${new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`,
-      distancia: formData.distancia,
-      duracion: formData.duracion,
-      ritmo: formData.ritmo,
+      distancia: formData.distancia.trim(),
+      duracion: formData.duracion.trim(),
+      ritmo: formData.ritmo.trim(),
       tag: formData.tag,
       tagType: formData.tag === 'Récord' ? 'pr' : ''
     }
 
-    // Enviar al padre
-    onRegistrar(nuevaActividad)
-    
-    // Resetear formulario
-    setFormData({
-      tipo: 'run',
-      nombre: '',
-      distancia: '',
-      duracion: '',
-      ritmo: '',
-      tag: 'Entrenamiento',
-      tagType: ''
-    })
-    
-    // Cerrar modal
-    onClose()
+    try {
+      setGuardando(true)
+      // Enviar al padre (que ahora guarda en Firestore)
+      await onRegistrar(nuevaActividad)
+      
+      // Resetear formulario
+      setFormData({
+        tipo: 'run',
+        nombre: '',
+        distancia: '',
+        duracion: '',
+        ritmo: '',
+        tag: 'Entrenamiento',
+        tagType: ''
+      })
+      
+      // Cerrar modal
+      onClose()
+    } catch (err) {
+      console.error('Error al guardar actividad:', err)
+      setErrorGuardado('No se pudo guardar la actividad. Intenta de nuevo.')
+    } finally {
+      setGuardando(false)
+    }
   }
 
   // Si no está abierto, no renderizar nada
@@ -96,7 +108,7 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>📝 Registrar Actividad</h2>
-          <button className="modal-close" onClick={onClose}>✕</button>
+          <button className="modal-close" onClick={onClose} disabled={guardando}>✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
@@ -110,6 +122,7 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
                   type="button"
                   className={`modal-tipo-btn ${formData.tipo === tipo.id ? 'active' : ''}`}
                   onClick={() => setFormData(prev => ({ ...prev, tipo: tipo.id }))}
+                  disabled={guardando}
                 >
                   {tipo.label}
                 </button>
@@ -128,6 +141,7 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
               value={formData.nombre}
               onChange={handleChange}
               className={errors.nombre ? 'error' : ''}
+              disabled={guardando}
             />
             {errors.nombre && <span className="modal-error">{errors.nombre}</span>}
           </div>
@@ -143,6 +157,7 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
               value={formData.distancia}
               onChange={handleChange}
               className={errors.distancia ? 'error' : ''}
+              disabled={guardando}
             />
             {errors.distancia && <span className="modal-error">{errors.distancia}</span>}
           </div>
@@ -159,6 +174,7 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
                 value={formData.duracion}
                 onChange={handleChange}
                 className={errors.duracion ? 'error' : ''}
+                disabled={guardando}
               />
               {errors.duracion && <span className="modal-error">{errors.duracion}</span>}
             </div>
@@ -173,6 +189,7 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
                 value={formData.ritmo}
                 onChange={handleChange}
                 className={errors.ritmo ? 'error' : ''}
+                disabled={guardando}
               />
               {errors.ritmo && <span className="modal-error">{errors.ritmo}</span>}
             </div>
@@ -186,6 +203,7 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
               name="tag"
               value={formData.tag}
               onChange={handleChange}
+              disabled={guardando}
             >
               {tagsDisponibles.map(tag => (
                 <option key={tag.value} value={tag.value}>
@@ -195,13 +213,29 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
             </select>
           </div>
 
+          {/* Error al guardar */}
+          {errorGuardado && (
+            <div className="login-error">
+              <span>⚠️ {errorGuardado}</span>
+            </div>
+          )}
+
           {/* Botones */}
           <div className="modal-actions">
-            <button type="button" className="modal-btn-cancel" onClick={onClose}>
+            <button 
+              type="button" 
+              className="modal-btn-cancel" 
+              onClick={onClose}
+              disabled={guardando}
+            >
               Cancelar
             </button>
-            <button type="submit" className="modal-btn-submit">
-              ✅ Registrar Actividad
+            <button 
+              type="submit" 
+              className="modal-btn-submit"
+              disabled={guardando}
+            >
+              {guardando ? '⏳ Guardando...' : '✅ Registrar Actividad'}
             </button>
           </div>
         </form>
