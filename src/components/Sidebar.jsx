@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 
 function Sidebar({ onPaginaChange }) {
   const [paginaActiva, setPaginaActiva] = useState('panel')
+  const { currentUser, logout } = useAuth()
 
   const menuItems = [
     { id: 'panel', label: 'Panel', icon: 'panel' },
@@ -22,6 +24,14 @@ function Sidebar({ onPaginaChange }) {
   const handleClick = (id) => {
     setPaginaActiva(id)
     if (onPaginaChange) onPaginaChange(id)
+  }
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error)
+    }
   }
 
   return (
@@ -52,12 +62,27 @@ function Sidebar({ onPaginaChange }) {
 
       <div className="sidebar__footer">
         <div className="profile">
-          <div className="profile__avatar">JU</div>
+          <div className="profile__avatar">
+            {currentUser?.email?.charAt(0).toUpperCase() || 'U'}
+          </div>
           <div className="profile__meta">
-            <span className="profile__name">Juan User</span>
+            <span className="profile__name">
+              {currentUser?.email?.split('@')[0] || 'Usuario'}
+            </span>
             <span className="profile__plan">Racha de 12 días</span>
           </div>
         </div>
+        <button 
+          className="logout-btn" 
+          onClick={handleLogout}
+          title="Cerrar sesión"
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" 
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Cerrar sesión
+        </button>
       </div>
     </aside>
   )

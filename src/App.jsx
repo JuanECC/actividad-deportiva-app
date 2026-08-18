@@ -5,9 +5,13 @@ import Scoreboard from './components/Scoreboard'
 import ActivityLog from './components/ActivityLog'
 import SideColumn from './components/SideColumn'
 import ModalRegistro from './components/ModalRegistro'
+import Login from './components/Login'
+import { useAuth } from './context/AuthContext'
 import './App.css'
 
 function App() {
+  const { currentUser } = useAuth()
+  
   const [actividades, setActividades] = useState([
     {
       id: 1,
@@ -72,6 +76,11 @@ function App() {
   ])
 
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // Si no hay usuario autenticado, mostrar login
+  if (!currentUser) {
+    return <Login />
+  }
 
   // Función para agregar actividad
   const agregarActividad = (nuevaActividad) => {
