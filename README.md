@@ -26,6 +26,22 @@
 
 ---
 
+# 🏃 SPLIT — Registro de entrenamientos
+
+> **Dashboard deportivo con autenticación, registro de actividades y seguimiento personalizado.**
+
+**SPLIT** es una aplicación web moderna para deportistas que permite:
+
+- **Registrar actividades deportivas** (carrera, ciclismo, natación, fuerza)
+- **Visualizar estadísticas** en tiempo real (distancia, tiempo, ritmo, rachas)
+- **Dar seguimiento a objetivos** mensuales de distancia, fuerza y sueño
+- **Consultar récords personales** basados en el historial
+- **Sincronizar datos en la nube** para acceso desde cualquier dispositivo
+
+El proyecto se desarrolla como parte del programa **DevF** y utiliza una arquitectura frontend con React, Firebase para autenticación y persistencia, y APIs externas para contenido deportivo y nutricional.
+
+---
+
 ## 🛠️ Tecnologías
 
 | Tecnología | Versión | Propósito |
@@ -42,18 +58,27 @@
 
 ## 📦 Instalación
 
+## 📦 Instalación
+
 ### Requisitos previos
 
-- **Node.js** (v20 o superior) → [Descargar](https://nodejs.org/)
-- **Git** → [Descargar](https://git-scm.com/downloads)
-- **Cuenta Firebase** → [Crear](https://console.firebase.google.com/)
+Antes de comenzar, asegúrate de tener instalado:
+
+| Requisito | Versión mínima | Descarga |
+|-----------|---------------|----------|
+| **Node.js** | v20.0.0 o superior | [nodejs.org](https://nodejs.org/) |
+| **npm** | v10.0.0 o superior | Incluido con Node.js |
+| **Git** | v2.30 o superior | [git-scm.com](https://git-scm.com/) |
+| **Editor de código** | VS Code recomendado | [code.visualstudio.com](https://code.visualstudio.com/) |
 
 ### Configuración de Firebase
 
-1. Crear proyecto en [Firebase Console](https://console.firebase.google.com/)
-2. Activar **Authentication** → Email/Password
-3. Activar **Firestore Database** → Modo de prueba
-4. Copiar la configuración de tu Web App
+1. Crear cuenta en [Firebase Console](https://console.firebase.google.com/)
+2. Crear un proyecto nuevo llamado `actividad-deportiva`
+3. Activar **Authentication** → método **Email/Password**
+4. Activar **Firestore Database** → modo de prueba
+5. Agregar una **Web App** y copiar la configuración
+6. Pegar las credenciales en `src/services/firebase.js`
 
 ### Pasos para instalar
 

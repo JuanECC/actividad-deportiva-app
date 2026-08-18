@@ -11,14 +11,16 @@
 - **Framework:** SCRUM
 - **Duración Sprint:** 2 semanas
 - **Días de trabajo:** Martes y Jueves
-- **Daily:** 
+- **Daily:** Al inicio de cada sesión de trabajo
 
 ## 🔧 Herramientas
 
 - **Repositorio:** GitHub
 - **Comunicación:** Discord / Slack
-- **Gestión de Tareas:** GitHub Projects
+- **Gestión de Tareas:** Trello (sprints y checklists)
 - **IDE:** VS Code
+- **Base de datos:** Firebase Firestore
+- **Autenticación:** Firebase Auth
 
 ## 🌿 Ramas de Git
 
@@ -44,7 +46,7 @@ Formato: `tipo: descripción`
 - `test:` Pruebas
 - `chore:` Tareas de mantenimiento
 
-**Ejemplo:** `feat: agregar formulario de registro`
+**Ejemplo:** `feat: agregar autenticación con Firebase`
 
 ## 🎯 Sprint 1 (Completado)
 
@@ -64,11 +66,31 @@ Formato: `tipo: descripción`
 
 **HU-04: Persistencia de Datos** ✅
 - Como usuario quiero que mis datos se guarden
-- Criterios: localStorage, persistencia al recargar
+- Criterios: Firestore, persistencia en la nube
 
 **HU-05: Estadísticas** ✅
 - Como usuario quiero ver estadísticas
 - Criterios: Total, duración promedio, por tipo
+
+## 🎯 Sprint 2 (En Progreso)
+
+### Historias de Usuario
+
+**HU-06: Autenticación con Firebase** ✅
+- Login/registro con email/password
+- Criterios: Firebase Auth, sesión persistente
+
+**HU-07: Integración API Wger** ⏳
+- Consultar ejercicios y nutrición desde API externa
+- Criterios: Cliente HTTP, manejo de errores
+
+**HU-08: Página de Actividades** ⏳
+- Mostrar catálogo de ejercicios con filtros
+- Criterios: Búsqueda por músculo, detalle de ejercicio
+
+**HU-09: Página de Progreso** ⏳
+- Gráficos de evolución del usuario
+- Criterios: Visualización de tendencias
 
 ## ✅ Definición de Hecho
 
@@ -77,4 +99,5 @@ Formato: `tipo: descripción`
 - [x] Commits con mensajes claros
 - [x] Probado manualmente
 - [x] Responsive (móvil y desktop)
-- [x] Documentación actualizada
+- [x] Documentación actualizada (README, ACUERDOS)
+- [x] Checklist de Trello completado
