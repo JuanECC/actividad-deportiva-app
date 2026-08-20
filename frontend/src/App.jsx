@@ -6,6 +6,7 @@ import ActivityLog from './components/ActivityLog'
 import SideColumn from './components/SideColumn'
 import ModalRegistro from './components/ModalRegistro'
 import Login from './components/Login'
+import TestApi from './components/TestApi'
 import { useAuth } from './context/AuthContext'
 import { useActividades } from './hooks/useActividades'
 import './App.css'
@@ -54,6 +55,9 @@ function App() {
             </div>
           </>
         )}
+
+        {/* Componente de prueba de conexión con backend */}
+        <TestApi />
       </main>
 
       <ModalRegistro 
