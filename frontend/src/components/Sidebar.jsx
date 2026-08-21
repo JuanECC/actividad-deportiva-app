@@ -1,16 +1,19 @@
+// frontend/src/components/Sidebar.jsx
 import React, { useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
-function Sidebar({ onPaginaChange }) {
+function Sidebar() {
   const [paginaActiva, setPaginaActiva] = useState('panel')
   const { currentUser, logout } = useAuth()
+  const location = useLocation()
 
   const menuItems = [
-    { id: 'panel', label: 'Panel', icon: 'panel' },
-    { id: 'actividades', label: 'Actividades', icon: 'actividades' },
-    { id: 'progreso', label: 'Progreso', icon: 'progreso' },
-    { id: 'objetivos', label: 'Objetivos', icon: 'objetivos' },
-    { id: 'ajustes', label: 'Ajustes', icon: 'ajustes' }
+    { id: 'panel', label: 'Panel', path: '/', icon: 'panel' },
+    { id: 'actividades', label: 'Actividades', path: '/actividades', icon: 'actividades' },
+    { id: 'progreso', label: 'Progreso', path: '/progreso', icon: 'progreso' },
+    { id: 'objetivos', label: 'Objetivos', path: '/objetivos', icon: 'objetivos' },
+    { id: 'ajustes', label: 'Ajustes', path: '/ajustes', icon: 'ajustes' }
   ]
 
   const iconMap = {
@@ -21,11 +24,6 @@ function Sidebar({ onPaginaChange }) {
     ajustes: <svg viewBox="0 0 24 24" fill="none"><path d="M4 21v-6M4 11V3M12 21v-9M12 8V3M20 21v-4M20 13V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><circle cx="4" cy="13" r="2" fill="currentColor"/><circle cx="12" cy="10" r="2" fill="currentColor"/><circle cx="20" cy="15" r="2" fill="currentColor"/></svg>
   }
 
-  const handleClick = (id) => {
-    setPaginaActiva(id)
-    if (onPaginaChange) onPaginaChange(id)
-  }
-
   const handleLogout = async () => {
     try {
       await logout()
@@ -33,6 +31,14 @@ function Sidebar({ onPaginaChange }) {
       console.error('Error al cerrar sesión:', error)
     }
   }
+
+  // Determinar página activa según la ruta actual
+  const getActivePage = () => {
+    const currentItem = menuItems.find(item => item.path === location.pathname)
+    return currentItem ? currentItem.id : 'panel'
+  }
+
+  const activePage = getActivePage()
 
   return (
     <aside className="sidebar">
@@ -43,20 +49,17 @@ function Sidebar({ onPaginaChange }) {
 
       <nav className="nav">
         {menuItems.map(item => (
-          <a 
+          <Link
             key={item.id}
-            className={`nav__item ${paginaActiva === item.id ? 'nav__item--active' : ''}`}
-            href="#"
-            onClick={(e) => {
-              e.preventDefault()
-              handleClick(item.id)
-            }}
+            to={item.path}
+            className={`nav__item ${activePage === item.id ? 'nav__item--active' : ''}`}
+            onClick={() => setPaginaActiva(item.id)}
           >
             <span className="nav__icon" aria-hidden="true">
               {iconMap[item.icon]}
             </span>
             {item.label}
-          </a>
+          </Link>
         ))}
       </nav>
 

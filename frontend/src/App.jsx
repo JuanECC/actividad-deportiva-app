@@ -1,12 +1,15 @@
+// frontend/src/App.jsx
 import React, { useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import Topbar from './components/Topbar'
-import Scoreboard from './components/Scoreboard'
-import ActivityLog from './components/ActivityLog'
-import SideColumn from './components/SideColumn'
 import ModalRegistro from './components/ModalRegistro'
 import Login from './components/Login'
-import TestApi from './components/TestApi'
+import Panel from './pages/Panel'
+import Actividades from './pages/Actividades'
+import Progreso from './pages/Progreso'
+import Objetivos from './pages/Objetivos'
+import Ajustes from './pages/Ajustes'
 import { useAuth } from './context/AuthContext'
 import { useActividades } from './hooks/useActividades'
 import './App.css'
@@ -29,43 +32,58 @@ function App() {
   }
 
   return (
-    <div className="app">
-      <Sidebar />
-      <main className="main">
-        <Topbar onRegistrar={() => setIsModalOpen(true)} />
-        
-        {loading ? (
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <p>Cargando tus actividades...</p>
-          </div>
-        ) : error ? (
-          <div className="error-container">
-            <p>⚠️ Error al cargar actividades: {error}</p>
-          </div>
-        ) : (
-          <>
-            <Scoreboard actividades={actividades} />
-            <div className="grid">
-              <ActivityLog 
-                actividades={actividades} 
-                onEliminar={eliminarActividad}
-              />
-              <SideColumn actividades={actividades} />
-            </div>
-          </>
-        )}
+    <BrowserRouter>
+      <div className="app">
+        <Sidebar />
+        <main className="main">
+          <Topbar onRegistrar={() => setIsModalOpen(true)} />
+          
+          <Routes>
+            <Route 
+              path="/" 
+              element={
+                <Panel 
+                  actividades={actividades} 
+                  onEliminar={eliminarActividad}
+                  loading={loading}
+                  error={error}
+                />
+              } 
+            />
+            <Route 
+              path="/actividades" 
+              element={
+                <Actividades 
+                  actividades={actividades} 
+                  onEliminar={eliminarActividad}
+                  loading={loading}
+                  error={error}
+                />
+              } 
+            />
+            <Route 
+              path="/progreso" 
+              element={<Progreso actividades={actividades} />} 
+            />
+            <Route 
+              path="/objetivos" 
+              element={<Objetivos actividades={actividades} />} 
+            />
+            <Route 
+              path="/ajustes" 
+              element={<Ajustes />} 
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
 
-        {/* Componente de prueba de conexión con backend */}
-        <TestApi />
-      </main>
-
-      <ModalRegistro 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onRegistrar={agregarActividad}
-      />
-    </div>
+        <ModalRegistro 
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onRegistrar={agregarActividad}
+        />
+      </div>
+    </BrowserRouter>
   )
 }
 
