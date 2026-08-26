@@ -1,8 +1,112 @@
-node_modules
-dist
+# ==============================
+# DEPENDENCIAS
+# ==============================
+
+node_modules/
+
+# ==============================
+# VARIABLES DE ENTORNO
+# ==============================
+
 .env
-.env.local
+.env.*
+!.env.example
+
+# ==============================
+# API KEYS / SECRETOS
+# ==============================
+
+secrets/
+credentials/
+private/
+
+*.key
+*.pem
+*.p12
+*.pfx
+
+client_secret*.json
+credentials*.json
+serviceAccount*.json
+firebase-adminsdk-*.json
+
+# ==============================
+# FIREBASE / GOOGLE
+# ==============================
+
+google-services.json
+GoogleService-Info.plist
+
+# ==============================
+# BUILD
+# ==============================
+
+dist/
+build/
+.vite/
+
+# ==============================
+# LOGS
+# ==============================
+
 *.log
-.DS_Store
-.vscode/
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ==============================
+# BASES DE DATOS LOCALES
+# ==============================
+
+*.sqlite
+*.sqlite3
+*.db
+
+backups/
+database/
+
+# ==============================
+# ARCHIVOS TEMPORALES
+# ==============================
+
+tmp/
+temp/
+cache/
+
+*.tmp
+
+# ==============================
+# UPLOADS LOCALES
+# ==============================
+
+uploads/
+
+# ==============================
+# IDE
+# ==============================
+
 .idea/
+*.iml
+
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# ==============================
+# SISTEMA OPERATIVO
+# ==============================
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==============================
+# CERTIFICADOS
+# ==============================
+
+*.crt
+*.cer
+*.p12
+*.pfx

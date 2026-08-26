@@ -1,22 +1,17 @@
-// src/services/firebase.js
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA7zsr2md6WTKSEdPRTPv4G9Cs29aQFNZA",
-  authDomain: "actividad-deportiva.firebaseapp.com",
-  projectId: "actividad-deportiva",
-  storageBucket: "actividad-deportiva.firebasestorage.app",
-  messagingSenderId: "198925659899",
-  appId: "1:198925659899:web:66eb0d22a1ffcce49b8a5e"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 }
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig)
 
-// Initialize Auth
 export const auth = getAuth(app)
-
-// Initialize Firestore
 export const db = getFirestore(app)

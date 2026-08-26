@@ -1,2 +1,46 @@
-node_modules
+# ==============================
+# DEPENDENCIAS
+# ==============================
+
+node_modules/
+
+# ==============================
+# VARIABLES DE ENTORNO
+# ==============================
+
 .env
+.env.*
+!.env.example
+
+# ==============================
+# BUILD
+# ==============================
+
+dist/
+build/
+
+# ==============================
+# LOGS
+# ==============================
+
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ==============================
+# SISTEMA / IDE
+# ==============================
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+.idea/
+*.iml
