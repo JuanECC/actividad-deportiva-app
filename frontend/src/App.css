@@ -973,3 +973,83 @@ svg { display: block; }
   font-size: 14px;
   margin-bottom: 20px;
 }
+/* =========================================================
+   Exercise catalog
+   ========================================================= */
+.exercise-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.exercise-filters select {
+  padding: 10px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.exercise-filters select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.exercise-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.exercise-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.exercise-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-dim);
+}
+
+.exercise-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.exercise-card__name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.exercise-card__category {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  background: rgba(203, 255, 77, 0.1);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.exercise-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.exercise-card__detail {
+  font-size: 13px;
+  color: var(--text-muted);
+}

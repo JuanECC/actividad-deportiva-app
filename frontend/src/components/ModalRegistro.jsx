@@ -1,5 +1,31 @@
-// src/components/ModalRegistro.jsx
 import React, { useState } from 'react'
+
+const camposPorTipo = {
+  run: {
+    distanciaLabel: 'Distancia (km)',
+    distanciaPlaceholder: 'Ej: 8.4',
+    ritmoLabel: 'Ritmo (min/km)',
+    ritmoPlaceholder: 'Ej: 5:01'
+  },
+  bike: {
+    distanciaLabel: 'Distancia (km)',
+    distanciaPlaceholder: 'Ej: 24.1',
+    ritmoLabel: 'Velocidad (km/h)',
+    ritmoPlaceholder: 'Ej: 24.7'
+  },
+  swim: {
+    distanciaLabel: 'Distancia (m)',
+    distanciaPlaceholder: 'Ej: 1800',
+    ritmoLabel: 'Ritmo (min/100m)',
+    ritmoPlaceholder: 'Ej: 2:07'
+  },
+  strength: {
+    distanciaLabel: 'Nº ejercicios',
+    distanciaPlaceholder: 'Ej: 5',
+    ritmoLabel: 'Peso total (kg)',
+    ritmoPlaceholder: 'Ej: 4200'
+  }
+}
 
 function ModalRegistro({ isOpen, onClose, onRegistrar }) {
   const [formData, setFormData] = useState({
@@ -16,7 +42,6 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
   const [guardando, setGuardando] = useState(false)
   const [errorGuardado, setErrorGuardado] = useState('')
 
-  // Tipos de actividad con sus emojis
   const tiposActividad = [
     { id: 'run', label: '🏃 Carrera' },
     { id: 'bike', label: '🚴 Ciclismo' },
@@ -24,7 +49,6 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
     { id: 'strength', label: '🏋️ Fuerza' }
   ]
 
-  // Tags predefinidos
   const tagsDisponibles = [
     { value: 'Entrenamiento', label: 'Entrenamiento' },
     { value: 'Récord', label: '⭐ Récord' },
@@ -34,10 +58,11 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
     { value: 'Volumen', label: '📈 Volumen' }
   ]
 
+  const campos = camposPorTipo[formData.tipo] || camposPorTipo.run
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
-    // Limpiar error del campo
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }))
     }
@@ -45,23 +70,19 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
-    // Resetear errores
     setErrorGuardado('')
-    
-    // Validaciones
+
     const newErrors = {}
     if (!formData.nombre.trim()) newErrors.nombre = 'El nombre es obligatorio'
-    if (!formData.distancia.trim()) newErrors.distancia = 'La distancia es obligatoria'
+    if (!formData.distancia.trim()) newErrors.distancia = 'Este campo es obligatorio'
     if (!formData.duracion.trim()) newErrors.duracion = 'La duración es obligatoria'
-    if (!formData.ritmo.trim()) newErrors.ritmo = 'El ritmo es obligatorio'
-    
+    if (!formData.ritmo.trim()) newErrors.ritmo = 'Este campo es obligatorio'
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
       return
     }
 
-    // Crear objeto de actividad (sin id ni fecha, Firestore los genera)
     const nuevaActividad = {
       tipo: formData.tipo,
       nombre: formData.nombre.trim(),
@@ -76,10 +97,7 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
 
     try {
       setGuardando(true)
-      // Enviar al padre (que ahora guarda en Firestore)
       await onRegistrar(nuevaActividad)
-      
-      // Resetear formulario
       setFormData({
         tipo: 'run',
         nombre: '',
@@ -89,8 +107,6 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
         tag: 'Entrenamiento',
         tagType: ''
       })
-      
-      // Cerrar modal
       onClose()
     } catch (err) {
       console.error('Error al guardar actividad:', err)
@@ -100,7 +116,6 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
     }
   }
 
-  // Si no está abierto, no renderizar nada
   if (!isOpen) return null
 
   return (
@@ -112,7 +127,6 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
-          {/* Tipo de actividad */}
           <div className="modal-field">
             <label>Tipo de actividad</label>
             <div className="modal-tipo-grid">
@@ -130,7 +144,6 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
             </div>
           </div>
 
-          {/* Nombre */}
           <div className="modal-field">
             <label htmlFor="nombre">Nombre de la actividad *</label>
             <input
@@ -146,14 +159,13 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
             {errors.nombre && <span className="modal-error">{errors.nombre}</span>}
           </div>
 
-          {/* Distancia */}
           <div className="modal-field">
-            <label htmlFor="distancia">Distancia *</label>
+            <label htmlFor="distancia">{campos.distanciaLabel} *</label>
             <input
               id="distancia"
               name="distancia"
               type="text"
-              placeholder="Ej: 8.4 km, 1,800 m, 5 ejerc."
+              placeholder={campos.distanciaPlaceholder}
               value={formData.distancia}
               onChange={handleChange}
               className={errors.distancia ? 'error' : ''}
@@ -162,7 +174,6 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
             {errors.distancia && <span className="modal-error">{errors.distancia}</span>}
           </div>
 
-          {/* Duración y Ritmo (2 columnas) */}
           <div className="modal-row">
             <div className="modal-field">
               <label htmlFor="duracion">Duración *</label>
@@ -180,12 +191,12 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
             </div>
 
             <div className="modal-field">
-              <label htmlFor="ritmo">Ritmo *</label>
+              <label htmlFor="ritmo">{campos.ritmoLabel} *</label>
               <input
                 id="ritmo"
                 name="ritmo"
                 type="text"
-                placeholder="Ej: 5:01 /km, 24.7 km/h"
+                placeholder={campos.ritmoPlaceholder}
                 value={formData.ritmo}
                 onChange={handleChange}
                 className={errors.ritmo ? 'error' : ''}
@@ -195,7 +206,6 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
             </div>
           </div>
 
-          {/* Tag */}
           <div className="modal-field">
             <label htmlFor="tag">Etiqueta</label>
             <select
@@ -213,14 +223,12 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
             </select>
           </div>
 
-          {/* Error al guardar */}
           {errorGuardado && (
             <div className="login-error">
               <span>⚠️ {errorGuardado}</span>
             </div>
           )}
 
-          {/* Botones */}
           <div className="modal-actions">
             <button 
               type="button" 
