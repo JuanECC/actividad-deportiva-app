@@ -1,4 +1,3 @@
-// frontend/src/App.jsx
 import React, { useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
@@ -25,6 +24,17 @@ function App() {
   } = useActividades()
   
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalInitialData, setModalInitialData] = useState(null)
+
+  const abrirModalConDatos = (data) => {
+    setModalInitialData(data)
+    setIsModalOpen(true)
+  }
+
+  const cerrarModal = () => {
+    setIsModalOpen(false)
+    setModalInitialData(null)
+  }
 
   // Si no hay usuario autenticado, mostrar login
   if (!currentUser) {
@@ -36,7 +46,7 @@ function App() {
       <div className="app">
         <Sidebar />
         <main className="main">
-          <Topbar onRegistrar={() => setIsModalOpen(true)} />
+          <Topbar onRegistrar={() => abrirModalConDatos(null)} />
           
           <Routes>
             <Route 
@@ -58,6 +68,7 @@ function App() {
                   onEliminar={eliminarActividad}
                   loading={loading}
                   error={error}
+                  onRegistrarActividad={abrirModalConDatos}
                 />
               } 
             />
@@ -79,8 +90,9 @@ function App() {
 
         <ModalRegistro 
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={cerrarModal}
           onRegistrar={agregarActividad}
+          initialData={modalInitialData}
         />
       </div>
     </BrowserRouter>

@@ -1,6 +1,6 @@
 import React from 'react'
 
-function ExerciseCard({ ejercicio }) {
+function ExerciseCard({ ejercicio, onSelect }) {
   return (
     <div className="exercise-card">
       <div className="exercise-card__header">
@@ -19,6 +19,12 @@ function ExerciseCard({ ejercicio }) {
         <p className="exercise-card__detail">
           <strong>Equipo:</strong> {ejercicio.equipment?.join(', ') || 'Sin equipamiento'}
         </p>
+        <button 
+          className="exercise-card__btn"
+          onClick={() => onSelect && onSelect(ejercicio)}
+        >
+          + Registrar
+        </button>
       </div>
     </div>
   )

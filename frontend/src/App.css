@@ -1053,3 +1053,94 @@ svg { display: block; }
   font-size: 13px;
   color: var(--text-muted);
 }
+.exercise-card__btn {
+  margin-top: 12px;
+  padding: 8px 14px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.12s ease;
+}
+
+.exercise-card__btn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+/* =========================================================
+   Sports catalog
+   ========================================================= */
+.sports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.sport-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.sport-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-dim);
+}
+
+.sport-card__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.sport-card__image {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: var(--surface-2);
+  padding: 8px;
+}
+
+.sport-card__name {
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+}
+
+.catalog-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 3px;
+}
+
+.catalog-tab {
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all 0.15s ease;
+}
+
+.catalog-tab:hover {
+  color: var(--text);
+}
+
+.catalog-tab--active {
+  background: var(--accent);
+  color: var(--accent-ink);
+}

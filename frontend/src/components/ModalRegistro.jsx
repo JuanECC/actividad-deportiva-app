@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useSports } from '../hooks/useSports'
 
 const camposPorTipo = {
   run: {
@@ -27,20 +28,23 @@ const camposPorTipo = {
   }
 }
 
-function ModalRegistro({ isOpen, onClose, onRegistrar }) {
-  const [formData, setFormData] = useState({
-    tipo: 'run',
-    nombre: '',
-    distancia: '',
-    duracion: '',
-    ritmo: '',
-    tag: 'Entrenamiento',
-    tagType: ''
-  })
+const formInitial = {
+  tipo: 'run',
+  deporte: '',
+  nombre: '',
+  distancia: '',
+  duracion: '',
+  ritmo: '',
+  tag: 'Entrenamiento',
+  tagType: ''
+}
 
+function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
+  const [formData, setFormData] = useState(formInitial)
   const [errors, setErrors] = useState({})
   const [guardando, setGuardando] = useState(false)
   const [errorGuardado, setErrorGuardado] = useState('')
+  const { sports, loading: loadingSports } = useSports()
 
   const tiposActividad = [
     { id: 'run', label: '🏃 Carrera' },
@@ -57,6 +61,18 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
     { value: 'Velocidad', label: '⚡ Velocidad' },
     { value: 'Volumen', label: '📈 Volumen' }
   ]
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialData) {
+        setFormData({ ...formInitial, ...initialData })
+      } else {
+        setFormData(formInitial)
+      }
+      setErrors({})
+      setErrorGuardado('')
+    }
+  }, [isOpen, initialData])
 
   const campos = camposPorTipo[formData.tipo] || camposPorTipo.run
 
@@ -85,6 +101,7 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
 
     const nuevaActividad = {
       tipo: formData.tipo,
+      deporte: formData.deporte,
       nombre: formData.nombre.trim(),
       fecha: new Date().toISOString(),
       meta: `Hoy · ${new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`,
@@ -98,15 +115,6 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
     try {
       setGuardando(true)
       await onRegistrar(nuevaActividad)
-      setFormData({
-        tipo: 'run',
-        nombre: '',
-        distancia: '',
-        duracion: '',
-        ritmo: '',
-        tag: 'Entrenamiento',
-        tagType: ''
-      })
       onClose()
     } catch (err) {
       console.error('Error al guardar actividad:', err)
@@ -127,6 +135,24 @@ function ModalRegistro({ isOpen, onClose, onRegistrar }) {
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
+          <div className="modal-field">
+            <label htmlFor="deporte">Deporte *</label>
+            <select
+              id="deporte"
+              name="deporte"
+              value={formData.deporte || ''}
+              onChange={handleChange}
+              disabled={guardando || loadingSports}
+            >
+              <option value="">Selecciona un deporte</option>
+              {sports.map(sport => (
+                <option key={sport.idSport} value={sport.strSport}>
+                  {sport.strSport}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="modal-field">
             <label>Tipo de actividad</label>
             <div className="modal-tipo-grid">
