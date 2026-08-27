@@ -1,12 +1,21 @@
 import React, { useMemo } from 'react'
 
+function calcularDistancia(act) {
+  if (act.tipo === 'strength' || act.tipo === 'sport') return 0
+  const valor = parseFloat(String(act.distancia).replace(',', '.'))
+  if (isNaN(valor)) return 0
+  if (act.tipo === 'swim') return valor / 1000
+  return valor
+}
+
 function Scoreboard({ actividades }) {
   const stats = useMemo(() => {
     const hoy = new Date()
-    hoy.setHours(0,0,0,0)
+    hoy.setHours(0, 0, 0, 0)
 
     const hace7Dias = new Date(hoy)
     hace7Dias.setDate(hoy.getDate() - 6)
+
     const hace14Dias = new Date(hoy)
     hace14Dias.setDate(hoy.getDate() - 13)
 
@@ -19,14 +28,8 @@ function Scoreboard({ actividades }) {
     const actSemana = filtrarPorRango(hace7Dias, hoy)
     const actSemanaAnterior = filtrarPorRango(hace14Dias, hace7Dias)
 
-    const sumarDistancia = (lista) =>
-      lista.reduce((sum, act) => {
-        const valor = parseFloat(String(act.distancia).replace(',', '.'))
-        return sum + (isNaN(valor) ? 0 : valor)
-      }, 0)
-
-    const distanciaSemana = sumarDistancia(actSemana)
-    const distanciaSemanaAnterior = sumarDistancia(actSemanaAnterior)
+    const distanciaSemana = actSemana.reduce((sum, act) => sum + calcularDistancia(act), 0)
+    const distanciaSemanaAnterior = actSemanaAnterior.reduce((sum, act) => sum + calcularDistancia(act), 0)
 
     const totalMinutos = actividades.reduce((sum, act) => {
       const duracion = String(act.duracion || '')
@@ -49,12 +52,13 @@ function Scoreboard({ actividades }) {
         const [min, seg] = act.ritmo.split(':')
         return parseInt(min, 10) * 60 + parseInt(seg, 10)
       })
-    const ritmoPromedioSeg = ritmos.length > 0 ? ritmos.reduce((a, b) => a + b, 0) / ritmos.length : 0
+    const ritmoPromedioSeg = ritmos.length > 0
+      ? ritmos.reduce((a, b) => a + b, 0) / ritmos.length
+      : 0
     const ritmoPromedio = ritmos.length > 0
       ? `${Math.floor(ritmoPromedioSeg / 60)}:${Math.round(ritmoPromedioSeg % 60).toString().padStart(2, '0')}`
       : '--:--'
 
-    // Racha real
     const fechas = new Set(
       actividades.map(act => {
         const d = new Date(act.fecha)
@@ -68,7 +72,6 @@ function Scoreboard({ actividades }) {
       dia.setDate(dia.getDate() - 1)
     }
 
-    // Datos de lanes (últimos 7 días)
     const dias = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
     const distPorDia = dias.map((_, i) => {
       const d = new Date(hoy)
@@ -77,7 +80,7 @@ function Scoreboard({ actividades }) {
         const f = new Date(act.fecha)
         return f.getDate() === d.getDate() && f.getMonth() === d.getMonth() && f.getFullYear() === d.getFullYear()
       })
-      return sumarDistancia(actsDia)
+      return actsDia.reduce((sum, act) => sum + calcularDistancia(act), 0)
     })
     const maxDist = Math.max(...distPorDia, 1)
     const barras = distPorDia.map(dist => (dist / maxDist) * 100)
@@ -141,7 +144,7 @@ function Scoreboard({ actividades }) {
           <span className="stat-card__number stat-card__number--mono">{stats.ritmoPromedio}</span>
           <span className="stat-card__unit">/km</span>
         </div>
-        <p className="stat-card__foot">Basado en {stats.totalSesiones} actividad(es)</p>
+        <p className="stat-card__foot">Basado en {actividades.length} actividad(es)</p>
       </div>
 
       <div className="stat-card stat-card--accent">

@@ -1173,3 +1173,146 @@ svg { display: block; }
     grid-template-columns: 1fr;
   }
 }
+/* =========================================================
+   Plan calendar
+   ========================================================= */
+.planes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.plan-calendar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.plan-calendar h3 {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.plan-calendar__meta {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.plan-calendar__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.plan-day {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.plan-day:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.plan-day--done {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+.log__tipo-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  margin-right: 6px;
+  text-transform: uppercase;
+}
+
+.log__tipo-badge--plan {
+  background: rgba(110, 168, 255, 0.15);
+  color: var(--info);
+}
+
+.log__tipo-badge--sesion {
+  background: rgba(203, 255, 77, 0.15);
+  color: var(--accent);
+}
+/* =========================================================
+   Plan resumen en Actividades
+   ========================================================= */
+.plan-resumen {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.plan-resumen__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.plan-resumen__title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.plan-resumen__meta {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.plan-resumen__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.plan-resumen__porcentaje {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--accent);
+  font-size: 14px;
+}
+
+.plan-resumen__sesiones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.plan-sesion-chip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.plan-sesion-chip--vacio {
+  border-style: dashed;
+  color: var(--text-faint);
+}
+
+.actividades-subtitulo {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 16px 0 8px;
+}

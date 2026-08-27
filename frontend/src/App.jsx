@@ -15,14 +15,18 @@ import './App.css'
 
 function App() {
   const { currentUser, loading: authLoading } = useAuth()
-  const { 
-    actividades, 
-    loading: actividadesLoading, 
+  const {
+    actividades,
+    planes,
+    sesiones,
+    loading: actividadesLoading,
     error,
-    agregarActividad, 
-    eliminarActividad 
+    agregarActividad,
+    eliminarActividad,
+    marcarSesion,
+    desmarcarSesion
   } = useActividades()
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalInitialData, setModalInitialData] = useState(null)
 
@@ -36,7 +40,6 @@ function App() {
     setModalInitialData(null)
   }
 
-  // Mientras se determina si hay sesión, muestra un estado de carga
   if (authLoading) {
     return (
       <div className="loading-container">
@@ -46,7 +49,6 @@ function App() {
     )
   }
 
-  // Si no hay usuario autenticado, mostrar login
   if (!currentUser) {
     return <Login />
   }
@@ -57,48 +59,55 @@ function App() {
         <Sidebar />
         <main className="main">
           <Topbar onRegistrar={() => abrirModalConDatos(null)} />
-          
+
           <Routes>
-            <Route 
-              path="/" 
+            <Route
+              path="/"
               element={
-                <Panel 
-                  actividades={actividades} 
+                <Panel
+                  actividades={sesiones}
                   onEliminar={eliminarActividad}
                   loading={actividadesLoading}
                   error={error}
                 />
-              } 
+              }
             />
-            <Route 
-              path="/actividades" 
+            <Route
+              path="/actividades"
               element={
-                <Actividades 
-                  actividades={actividades} 
+                <Actividades
+                  actividades={actividades}
                   onEliminar={eliminarActividad}
                   loading={actividadesLoading}
                   error={error}
                   onRegistrarActividad={abrirModalConDatos}
                 />
-              } 
+              }
             />
-            <Route 
-              path="/progreso" 
-              element={<Progreso actividades={actividades} />} 
+            <Route
+              path="/progreso"
+              element={
+                <Progreso
+                  planes={planes}
+                  sesiones={sesiones}
+                  marcarSesion={marcarSesion}
+                  desmarcarSesion={desmarcarSesion}
+                />
+              }
             />
-            <Route 
-              path="/objetivos" 
-              element={<Objetivos actividades={actividades} />} 
+            <Route
+              path="/objetivos"
+              element={<Objetivos actividades={sesiones} />}
             />
-            <Route 
-              path="/ajustes" 
-              element={<Ajustes />} 
+            <Route
+              path="/ajustes"
+              element={<Ajustes />}
             />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
 
-        <ModalRegistro 
+        <ModalRegistro
           isOpen={isModalOpen}
           onClose={cerrarModal}
           onRegistrar={agregarActividad}

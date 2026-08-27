@@ -1,57 +1,114 @@
 import React, { useMemo } from 'react'
 
-function Progreso({ actividades }) {
-  const diasSemana = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
+const DIAS_SEMANA = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
 
-  const diasConActividad = useMemo(() => {
-    const dias = new Set()
-    actividades.forEach(act => {
-      const fecha = new Date(act.fecha)
-      const dia = diasSemana[fecha.getDay() === 0 ? 6 : fecha.getDay() - 1]
-      dias.add(dia)
-      // Si la actividad tiene días seleccionados, los agregamos
-      if (act.diasSeleccionados && Array.isArray(act.diasSeleccionados)) {
-        act.diasSeleccionados.forEach(d => dias.add(d))
+function generarFechas(plan) {
+  const fechas = []
+  const start = new Date(plan.fecha)
+  const semanas = plan.semanas || 1
+  const dias = plan.diasSeleccionados || []
+
+  for (let semana = 0; semana < semanas; semana++) {
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(start)
+      date.setDate(start.getDate() + semana * 7 + i)
+      const diaNombre = DIAS_SEMANA[(date.getDay() + 6) % 7]
+      if (dias.includes(diaNombre)) {
+        fechas.push(date.toISOString())
       }
-    })
-    return dias
-  }, [actividades])
+    }
+  }
+  return fechas
+}
+
+function PlanCalendar({ plan, sesiones, marcarSesion, desmarcarSesion, esHistorial }) {
+  const fechas = useMemo(() => generarFechas(plan), [plan])
+
+  const estaCompletada = (fecha) => {
+    const f = new Date(fecha)
+    return sesiones.some(s =>
+      s.planId === plan.id &&
+      new Date(s.fecha).getDate() === f.getDate() &&
+      new Date(s.fecha).getMonth() === f.getMonth() &&
+      new Date(s.fecha).getFullYear() === f.getFullYear()
+    )
+  }
+
+  return (
+    <div className={`plan-calendar ${esHistorial ? 'plan-calendar--historial' : ''}`}>
+      <h3>{plan.nombre}</h3>
+      <p className="plan-calendar__meta">
+        {plan.diasSeleccionados.join(', ')} · {plan.semanas} semana(s)
+      </p>
+      <div className="plan-calendar__grid">
+        {fechas.map(fecha => {
+          const completada = estaCompletada(fecha)
+          return (
+            <button
+              key={fecha}
+              className={`plan-day ${completada ? 'plan-day--done' : ''}`}
+              onClick={() => {
+                if (esHistorial) return
+                completada ? desmarcarSesion(plan, fecha) : marcarSesion(plan, fecha)
+              }}
+              title={new Date(fecha).toLocaleDateString('es-ES')}
+              disabled={esHistorial}
+            >
+              {new Date(fecha).getDate()}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function Progreso({ planes, sesiones, marcarSesion, desmarcarSesion }) {
+  const planesActivos = planes.filter(p => !p.completado)
+  const planesCompletados = planes.filter(p => p.completado)
 
   return (
     <section aria-label="Progreso">
-      <div className="panel">
-        <div className="panel__header">
-          <h2 className="panel__title">📅 Calendario de constancia</h2>
-        </div>
-        <div className="calendario-check">
-          {diasSemana.map(dia => (
-            <div
-              key={dia}
-              className={`dia-check ${diasConActividad.has(dia) ? 'dia-check--activo' : ''}`}
-            >
-              <span className="dia-check__label">{dia}</span>
-              <span className="dia-check__icon">
-                {diasConActividad.has(dia) ? '✅' : '⬜'}
-              </span>
-            </div>
-          ))}
-        </div>
-        <p className="calendario-nota">
-          Los días marcados indican que registraste actividad o la planeaste.
-        </p>
+      <div className="panel__header">
+        <h2 className="panel__title">📅 Calendario de actividades</h2>
       </div>
 
-      <div className="panel" style={{ marginTop: '16px' }}>
-        <div className="panel__header">
-          <h2 className="panel__title">Resumen de actividad</h2>
+      {planesActivos.length === 0 && planesCompletados.length === 0 ? (
+        <div className="panel">
+          <p style={{ color: 'var(--text-muted)' }}>
+            No tienes planes de actividad. Crea uno desde el registro con días y semanas.
+          </p>
         </div>
-        <p style={{ color: 'var(--text-muted)' }}>
-          Total de actividades: <strong>{actividades.length}</strong>
-        </p>
-        <p style={{ color: 'var(--text-muted)' }}>
-          Días con actividad esta semana: <strong>{diasConActividad.size}/7</strong>
-        </p>
-      </div>
+      ) : (
+        <div className="planes-list">
+          {planesActivos.map(plan => (
+            <PlanCalendar
+              key={plan.id}
+              plan={plan}
+              sesiones={sesiones}
+              marcarSesion={marcarSesion}
+              desmarcarSesion={desmarcarSesion}
+              esHistorial={false}
+            />
+          ))}
+        </div>
+      )}
+
+      {planesCompletados.length > 0 && (
+        <>
+          <h2 className="panel__title" style={{ marginTop: '32px' }}>🏆 Historial de planes completados</h2>
+          <div className="planes-list" style={{ marginTop: '16px' }}>
+            {planesCompletados.map(plan => (
+              <PlanCalendar
+                key={plan.id}
+                plan={plan}
+                sesiones={sesiones}
+                esHistorial={true}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </section>
   )
 }

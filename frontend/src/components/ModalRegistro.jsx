@@ -52,7 +52,7 @@ const diasSemana = [
   { id: 'J', label: 'J' },
   { id: 'V', label: 'V' },
   { id: 'S', label: 'S' },
-  { id: 'D', label: 'D' },
+  { id: 'D', label: 'D' }
 ]
 
 const normalizarDistancia = (valor, tipo) => {
@@ -105,13 +105,15 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
     if (isOpen) {
       if (initialData) {
         setFormData({ ...formInitial, ...initialData })
+        setDiasSeleccionados(initialData.diasSeleccionados || [])
+        setSemanas(initialData.semanas || 1)
       } else {
         setFormData(formInitial)
+        setDiasSeleccionados([])
+        setSemanas(1)
       }
       setErrors({})
       setErrorGuardado('')
-      setDiasSeleccionados([])
-      setSemanas(1)
     }
   }, [isOpen, initialData])
 
@@ -160,6 +162,7 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
       deporte: formData.deporte,
       nombre: formData.nombre.trim(),
       fecha: new Date().toISOString(),
+      fechaInicio: new Date().toISOString(),
       meta: `Hoy · ${new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`,
       distancia: normalizarDistancia(formData.distancia, formData.tipo),
       duracion: normalizarDuracion(formData.duracion),

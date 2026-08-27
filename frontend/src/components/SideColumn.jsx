@@ -1,5 +1,13 @@
 import React, { useMemo } from 'react'
 
+function calcularDistancia(act) {
+  if (act.tipo === 'strength' || act.tipo === 'sport') return 0
+  const valor = parseFloat(String(act.distancia).replace(',', '.'))
+  if (isNaN(valor)) return 0
+  if (act.tipo === 'swim') return valor / 1000
+  return valor
+}
+
 function SideColumn({ actividades }) {
   const objetivos = useMemo(() => {
     const ahora = new Date()
@@ -11,47 +19,76 @@ function SideColumn({ actividades }) {
       return f.getMonth() === mesActual && f.getFullYear() === anioActual
     })
 
-    const distanciaMes = actividadesMes.reduce((sum, act) => {
-      const valor = parseFloat(String(act.distancia).replace(',', '.'))
-      return sum + (isNaN(valor) ? 0 : valor)
-    }, 0)
+    const distanciaMes = actividadesMes.reduce((sum, act) => sum + calcularDistancia(act), 0)
 
     const sesionesFuerza = actividadesMes.filter(act => act.tipo === 'strength').length
 
+    // Meta elegida según actividad: si hay más de 3 sesiones, meta mayor
+    const metaDistancia = distanciaMes > 0 ? Math.max(50, Math.ceil(distanciaMes * 1.5)) : 100
+    const metaFuerza = sesionesFuerza > 0 ? Math.max(4, sesionesFuerza + 4) : 8
+
     return {
-      distancia: { actual: Math.round(distanciaMes), meta: 180 },
-      fuerza: { actual: sesionesFuerza, meta: 8 },
+      distancia: { actual: Math.round(distanciaMes), meta: metaDistancia },
+      fuerza: { actual: sesionesFuerza, meta: metaFuerza },
       suenio: { actual: 0, meta: 30 }
     }
   }, [actividades])
 
   const records = useMemo(() => {
-    const runs = actividades.filter(act => act.tipo === 'run' && act.ritmo && act.ritmo.includes(':'))
-    const mejorRitmoSeg = runs.length > 0
-      ? Math.min(...runs.map(act => {
-          const [min, seg] = act.ritmo.split(':')
-          return parseInt(min, 10) * 60 + parseInt(seg, 10)
-        }))
-      : null
+    const ahora = new Date()
+    const mesActual = ahora.getMonth()
+    const anioActual = ahora.getFullYear()
+    const mesAnterior = mesActual === 0 ? 11 : mesActual - 1
+    const anioAnterior = mesActual === 0 ? anioActual - 1 : anioActual
 
-    const estimarTiempo = (distancia, ritmoSeg) => {
-      const tiempoSeg = ritmoSeg * distancia
-      const mins = Math.floor(tiempoSeg / 60)
-      const segs = Math.round(tiempoSeg % 60)
-      return `${mins}:${segs.toString().padStart(2, '0')}`
+    const actMes = actividades.filter(act => {
+      const f = new Date(act.fecha)
+      return f.getMonth() === mesActual && f.getFullYear() === anioActual
+    })
+
+    const actMesAnterior = actividades.filter(act => {
+      const f = new Date(act.fecha)
+      return f.getMonth() === mesAnterior && f.getFullYear() === anioAnterior
+    })
+
+    const agruparPorDeporte = (lista) => {
+      const grupos = {}
+      lista.forEach(act => {
+        const clave = act.deporte || act.tipo || 'otro'
+        if (!grupos[clave]) {
+          grupos[clave] = {
+            nombre: clave,
+            distanciaTotal: 0,
+            duracionMax: 0,
+            sesiones: 0
+          }
+        }
+        grupos[clave].distanciaTotal += calcularDistancia(act)
+        grupos[clave].duracionMax = Math.max(grupos[clave].duracionMax, act.duracion || 0)
+        grupos[clave].sesiones += 1
+      })
+      return Object.values(grupos)
     }
 
-    const fuerzaAct = actividades.filter(act => act.tipo === 'strength')
-    const sentadilla = fuerzaAct.length > 0
-      ? `${Math.min(fuerzaAct.length * 15 + 80, 150)} kg`
-      : '—'
+    const resumenMes = agruparPorDeporte(actMes)
+    const resumenMesAnterior = agruparPorDeporte(actMesAnterior)
 
-    return [
-      { label: '5K', value: mejorRitmoSeg ? estimarTiempo(5, mejorRitmoSeg) : '--:--', date: '—' },
-      { label: '10K', value: mejorRitmoSeg ? estimarTiempo(10, mejorRitmoSeg) : '--:--', date: '—' },
-      { label: '21K', value: mejorRitmoSeg ? estimarTiempo(21, mejorRitmoSeg) : '--:--', date: '—' },
-      { label: 'Sentadilla', value: sentadilla, date: '—' }
-    ]
+    const recordsFinal = resumenMes.map(deporteActual => {
+      const anterior = resumenMesAnterior.find(d => d.nombre === deporteActual.nombre)
+      return {
+        label: deporteActual.nombre,
+        value: `${deporteActual.distanciaTotal.toFixed(1)} km`,
+        date: anterior
+          ? `vs ${anterior.distanciaTotal.toFixed(1)} km`
+          : 'Nuevo'
+      }
+    })
+
+    if (recordsFinal.length === 0) {
+      recordsFinal.push({ label: 'Sin récords', value: '—', date: '—' })
+    }
+
+    return recordsFinal.slice(0, 4)
   }, [actividades])
 
   return (
