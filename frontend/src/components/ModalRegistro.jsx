@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useSports } from '../hooks/useSports'
+import { deportes } from '../utils/deportes'
 
 const camposPorTipo = {
   run: {
@@ -25,6 +25,12 @@ const camposPorTipo = {
     distanciaPlaceholder: 'Ej: 5',
     ritmoLabel: 'Peso total (kg)',
     ritmoPlaceholder: 'Ej: 4200'
+  },
+  sport: {
+    distanciaLabel: 'Puntuación / Goles',
+    distanciaPlaceholder: 'Ej: 2 goles, 25 puntos',
+    ritmoLabel: 'Rendimiento',
+    ritmoPlaceholder: 'Ej: 70%, 3 asistencias'
   }
 }
 
@@ -39,18 +45,51 @@ const formInitial = {
   tagType: ''
 }
 
+const diasSemana = [
+  { id: 'L', label: 'L' },
+  { id: 'M', label: 'M' },
+  { id: 'X', label: 'X' },
+  { id: 'J', label: 'J' },
+  { id: 'V', label: 'V' },
+  { id: 'S', label: 'S' },
+  { id: 'D', label: 'D' },
+]
+
+const normalizarDistancia = (valor, tipo) => {
+  if (tipo === 'strength') return valor.trim()
+  const limpio = valor.replace(/[^\d.,]/g, '').replace(',', '.')
+  return limpio || valor.trim()
+}
+
+const normalizarDuracion = (valor) => {
+  const v = valor.trim().toLowerCase()
+  if (v.includes(':')) return valor.trim()
+
+  const matchH = v.match(/(\d+)\s*(h|hr|hrs|horas?)/)
+  if (matchH) return `${matchH[1]}:00`
+
+  const matchM = v.match(/(\d+)\s*(min|mins?)/)
+  if (matchM) return `0:${matchM[1].padStart(2, '0')}`
+
+  if (!isNaN(v) && v !== '') return `0:${v.padStart(2, '0')}`
+
+  return valor.trim()
+}
+
 function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
   const [formData, setFormData] = useState(formInitial)
   const [errors, setErrors] = useState({})
   const [guardando, setGuardando] = useState(false)
   const [errorGuardado, setErrorGuardado] = useState('')
-  const { sports, loading: loadingSports } = useSports()
+  const [diasSeleccionados, setDiasSeleccionados] = useState([])
+  const [semanas, setSemanas] = useState(1)
 
   const tiposActividad = [
     { id: 'run', label: '🏃 Carrera' },
     { id: 'bike', label: '🚴 Ciclismo' },
     { id: 'swim', label: '🏊 Natación' },
-    { id: 'strength', label: '🏋️ Fuerza' }
+    { id: 'strength', label: '🏋️ Fuerza' },
+    { id: 'sport', label: '🏅 Deporte' }
   ]
 
   const tagsDisponibles = [
@@ -71,10 +110,27 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
       }
       setErrors({})
       setErrorGuardado('')
+      setDiasSeleccionados([])
+      setSemanas(1)
     }
   }, [isOpen, initialData])
 
-  const campos = camposPorTipo[formData.tipo] || camposPorTipo.run
+  useEffect(() => {
+    if (formData.deporte) {
+      const deporteSeleccionado = deportes.find(d => d.nombre === formData.deporte)
+      if (deporteSeleccionado) {
+        setFormData(prev => ({ ...prev, tipo: deporteSeleccionado.tipo }))
+      }
+    }
+  }, [formData.deporte])
+
+  const campos = camposPorTipo[formData.tipo] || camposPorTipo.sport
+
+  const toggleDia = (dia) => {
+    setDiasSeleccionados(prev =>
+      prev.includes(dia) ? prev.filter(d => d !== dia) : [...prev, dia]
+    )
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -105,11 +161,13 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
       nombre: formData.nombre.trim(),
       fecha: new Date().toISOString(),
       meta: `Hoy · ${new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`,
-      distancia: formData.distancia.trim(),
-      duracion: formData.duracion.trim(),
+      distancia: normalizarDistancia(formData.distancia, formData.tipo),
+      duracion: normalizarDuracion(formData.duracion),
       ritmo: formData.ritmo.trim(),
       tag: formData.tag,
-      tagType: formData.tag === 'Récord' ? 'pr' : ''
+      tagType: formData.tag === 'Récord' ? 'pr' : '',
+      diasSeleccionados,
+      semanas
     }
 
     try {
@@ -142,12 +200,12 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
               name="deporte"
               value={formData.deporte || ''}
               onChange={handleChange}
-              disabled={guardando || loadingSports}
+              disabled={guardando}
             >
               <option value="">Selecciona un deporte</option>
-              {sports.map(sport => (
-                <option key={sport.idSport} value={sport.strSport}>
-                  {sport.strSport}
+              {deportes.map(deporte => (
+                <option key={deporte.id} value={deporte.nombre}>
+                  {deporte.icono} {deporte.nombre}
                 </option>
               ))}
             </select>
@@ -168,6 +226,37 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className="modal-field">
+            <label>Días de la semana</label>
+            <div className="dias-semana">
+              {diasSemana.map(dia => (
+                <button
+                  key={dia.id}
+                  type="button"
+                  className={`dia-btn ${diasSeleccionados.includes(dia.id) ? 'dia-btn--active' : ''}`}
+                  onClick={() => toggleDia(dia.id)}
+                  disabled={guardando}
+                >
+                  {dia.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="modal-field">
+            <label htmlFor="semanas">¿Cuántas semanas?</label>
+            <input
+              id="semanas"
+              name="semanas"
+              type="number"
+              min="1"
+              max="12"
+              value={semanas}
+              onChange={(e) => setSemanas(Math.max(1, Math.min(12, parseInt(e.target.value) || 1)))}
+              disabled={guardando}
+            />
           </div>
 
           <div className="modal-field">
@@ -207,7 +296,7 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
                 id="duracion"
                 name="duracion"
                 type="text"
-                placeholder="Ej: 42:10"
+                placeholder="Ej: 42:10, 1h 30min"
                 value={formData.duracion}
                 onChange={handleChange}
                 className={errors.duracion ? 'error' : ''}
@@ -256,16 +345,16 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
           )}
 
           <div className="modal-actions">
-            <button 
-              type="button" 
-              className="modal-btn-cancel" 
+            <button
+              type="button"
+              className="modal-btn-cancel"
               onClick={onClose}
               disabled={guardando}
             >
               Cancelar
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="modal-btn-submit"
               disabled={guardando}
             >

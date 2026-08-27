@@ -1,95 +1,127 @@
 import React, { useMemo } from 'react'
 
 function Scoreboard({ actividades }) {
-  // Calcular estadísticas basadas en las actividades
   const stats = useMemo(() => {
-    const total = actividades.length
-    
-    // Calcular distancia total (solo para actividades con distancia numérica)
-    let distanciaTotal = 0
-    let actividadesConDistancia = 0
-    actividades.forEach(act => {
-      const dist = parseFloat(act.distancia)
-      if (!isNaN(dist)) {
-        distanciaTotal += dist
-        actividadesConDistancia++
+    const hoy = new Date()
+    hoy.setHours(0,0,0,0)
+
+    const hace7Dias = new Date(hoy)
+    hace7Dias.setDate(hoy.getDate() - 6)
+    const hace14Dias = new Date(hoy)
+    hace14Dias.setDate(hoy.getDate() - 13)
+
+    const filtrarPorRango = (inicio, fin) =>
+      actividades.filter(act => {
+        const fecha = new Date(act.fecha)
+        return fecha >= inicio && fecha <= fin
+      })
+
+    const actSemana = filtrarPorRango(hace7Dias, hoy)
+    const actSemanaAnterior = filtrarPorRango(hace14Dias, hace7Dias)
+
+    const sumarDistancia = (lista) =>
+      lista.reduce((sum, act) => {
+        const valor = parseFloat(String(act.distancia).replace(',', '.'))
+        return sum + (isNaN(valor) ? 0 : valor)
+      }, 0)
+
+    const distanciaSemana = sumarDistancia(actSemana)
+    const distanciaSemanaAnterior = sumarDistancia(actSemanaAnterior)
+
+    const totalMinutos = actividades.reduce((sum, act) => {
+      const duracion = String(act.duracion || '')
+      const partes = duracion.split(':')
+      if (partes.length >= 2) {
+        const minutos = parseInt(partes[0], 10)
+        const segundos = parseInt(partes[1], 10) || 0
+        return sum + minutos + segundos / 60
       }
+      return sum
+    }, 0)
+
+    const horas = Math.floor(totalMinutos / 60)
+    const minutos = Math.round(totalMinutos % 60)
+    const tiempoTotal = `${horas}h ${minutos.toString().padStart(2, '0')}min`
+
+    const ritmos = actividades
+      .filter(act => act.ritmo && act.ritmo.includes(':'))
+      .map(act => {
+        const [min, seg] = act.ritmo.split(':')
+        return parseInt(min, 10) * 60 + parseInt(seg, 10)
+      })
+    const ritmoPromedioSeg = ritmos.length > 0 ? ritmos.reduce((a, b) => a + b, 0) / ritmos.length : 0
+    const ritmoPromedio = ritmos.length > 0
+      ? `${Math.floor(ritmoPromedioSeg / 60)}:${Math.round(ritmoPromedioSeg % 60).toString().padStart(2, '0')}`
+      : '--:--'
+
+    // Racha real
+    const fechas = new Set(
+      actividades.map(act => {
+        const d = new Date(act.fecha)
+        return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
+      })
+    )
+    let racha = 0
+    let dia = new Date(hoy)
+    while (fechas.has(`${dia.getFullYear()}-${dia.getMonth()}-${dia.getDate()}`)) {
+      racha++
+      dia.setDate(dia.getDate() - 1)
+    }
+
+    // Datos de lanes (últimos 7 días)
+    const dias = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+    const distPorDia = dias.map((_, i) => {
+      const d = new Date(hoy)
+      d.setDate(hoy.getDate() - (6 - i))
+      const actsDia = actividades.filter(act => {
+        const f = new Date(act.fecha)
+        return f.getDate() === d.getDate() && f.getMonth() === d.getMonth() && f.getFullYear() === d.getFullYear()
+      })
+      return sumarDistancia(actsDia)
     })
-    
-    // Calcular tiempo total (convertir duración a minutos)
-    let tiempoTotalMin = 0
-    actividades.forEach(act => {
-      if (act.duracion && act.duracion.includes(':')) {
-        const partes = act.duracion.split(':')
-        const minutos = parseInt(partes[0]) * 60 + parseInt(partes[1])
-        tiempoTotalMin += minutos
-      }
-    })
-    
-    const horas = Math.floor(tiempoTotalMin / 60)
-    const minutos = tiempoTotalMin % 60
-    const tiempoTotal = `${horas}:${minutos.toString().padStart(2, '0')}`
-    
-    // Calcular ritmo promedio (si hay actividades con ritmo)
-    let ritmoTotal = 0
-    let ritmoCount = 0
-    actividades.forEach(act => {
-      if (act.ritmo && act.ritmo.includes(':')) {
-        const partes = act.ritmo.split(':')
-        const segundos = parseInt(partes[0]) * 60 + parseInt(partes[1])
-        ritmoTotal += segundos
-        ritmoCount++
-      }
-    })
-    const ritmoPromedio = ritmoCount > 0 ? ritmoTotal / ritmoCount : 0
-    const ritmoMin = Math.floor(ritmoPromedio / 60)
-    const ritmoSeg = Math.round(ritmoPromedio % 60)
-    const ritmoFormateado = `${ritmoMin}:${ritmoSeg.toString().padStart(2, '0')}`
-    
-    // Días de racha (simulado basado en actividades)
-    const diasRacha = Math.min(total + 7, 21) // Simulación
-    
-    // Tipos de actividades
-    const tipos = {}
-    actividades.forEach(act => {
-      tipos[act.tipo] = (tipos[act.tipo] || 0) + 1
-    })
-    
+    const maxDist = Math.max(...distPorDia, 1)
+    const barras = distPorDia.map(dist => (dist / maxDist) * 100)
+
     return {
-      distanciaTotal: distanciaTotal.toFixed(1),
+      distanciaSemana,
+      distanciaSemanaAnterior,
       tiempoTotal,
-      ritmoPromedio: ritmoFormateado,
-      diasRacha,
-      totalSesiones: total,
-      tipos
+      ritmoPromedio,
+      racha,
+      totalSesiones: actividades.length,
+      barras,
+      dias
     }
   }, [actividades])
-
-  // Datos de las barras (simulados)
-  const barras = [35, 62, 20, 80, 48, 95, 15]
-  const dias = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
 
   return (
     <section className="scoreboard" aria-label="Resumen de la semana">
       <div className="stat-card stat-card--hero">
         <span className="stat-card__label">Distancia esta semana</span>
         <div className="stat-card__value">
-          <span className="stat-card__number">{stats.distanciaTotal}</span>
+          <span className="stat-card__number">{stats.distanciaSemana.toFixed(1)}</span>
           <span className="stat-card__unit">km</span>
         </div>
-        <div className="stat-card__delta stat-card__delta--up">
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none"><path d="M12 5v14M5 12l7-7 7 7" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          {actividades.length > 0 ? `${(stats.distanciaTotal / 5).toFixed(1)} km vs. semana anterior` : 'Sin datos suficientes'}
+        <div className="stat-card__delta">
+          {stats.distanciaSemanaAnterior > 0 ? (
+            <>
+              {stats.distanciaSemana > stats.distanciaSemanaAnterior
+                ? `+${(stats.distanciaSemana - stats.distanciaSemanaAnterior).toFixed(1)} km vs. semana anterior`
+                : `${(stats.distanciaSemana - stats.distanciaSemanaAnterior).toFixed(1)} km vs. semana anterior`}
+            </>
+          ) : (
+            'Sin datos de la semana anterior'
+          )}
         </div>
         <div className="lanes" aria-hidden="true">
-          {barras.map((altura, index) => (
+          {stats.barras.map((altura, index) => (
             <div key={index} className="lane">
               <span className="lane__fill" style={{ '--v': altura + '%' }}></span>
             </div>
           ))}
         </div>
         <div className="lanes__labels" aria-hidden="true">
-          {dias.map((dia, index) => (
+          {stats.dias.map((dia, index) => (
             <span key={index}>{dia}</span>
           ))}
         </div>
@@ -99,7 +131,6 @@ function Scoreboard({ actividades }) {
         <span className="stat-card__label">Tiempo total</span>
         <div className="stat-card__value">
           <span className="stat-card__number stat-card__number--mono">{stats.tiempoTotal}</span>
-          <span className="stat-card__unit">hrs</span>
         </div>
         <p className="stat-card__foot">{stats.totalSesiones} sesiones registradas</p>
       </div>
@@ -110,18 +141,16 @@ function Scoreboard({ actividades }) {
           <span className="stat-card__number stat-card__number--mono">{stats.ritmoPromedio}</span>
           <span className="stat-card__unit">/km</span>
         </div>
-        <p className="stat-card__foot stat-card__foot--good">
-          {stats.totalSesiones > 0 ? `${Math.round(Math.random() * 10 + 5)} seg más rápido que tu media` : 'Sin datos'}
-        </p>
+        <p className="stat-card__foot">Basado en {stats.totalSesiones} actividad(es)</p>
       </div>
 
       <div className="stat-card stat-card--accent">
         <span className="stat-card__label">Racha activa</span>
         <div className="stat-card__value">
-          <span className="stat-card__number">{stats.diasRacha}</span>
+          <span className="stat-card__number">{stats.racha}</span>
           <span className="stat-card__unit">días</span>
         </div>
-        <p className="stat-card__foot">Tu mejor racha: 21 días</p>
+        <p className="stat-card__foot">Días consecutivos con actividad</p>
       </div>
     </section>
   )

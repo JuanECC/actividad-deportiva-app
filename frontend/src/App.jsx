@@ -14,10 +14,10 @@ import { useActividades } from './hooks/useActividades'
 import './App.css'
 
 function App() {
-  const { currentUser } = useAuth()
+  const { currentUser, loading: authLoading } = useAuth()
   const { 
     actividades, 
-    loading, 
+    loading: actividadesLoading, 
     error,
     agregarActividad, 
     eliminarActividad 
@@ -34,6 +34,16 @@ function App() {
   const cerrarModal = () => {
     setIsModalOpen(false)
     setModalInitialData(null)
+  }
+
+  // Mientras se determina si hay sesión, muestra un estado de carga
+  if (authLoading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Cargando sesión...</p>
+      </div>
+    )
   }
 
   // Si no hay usuario autenticado, mostrar login
@@ -55,7 +65,7 @@ function App() {
                 <Panel 
                   actividades={actividades} 
                   onEliminar={eliminarActividad}
-                  loading={loading}
+                  loading={actividadesLoading}
                   error={error}
                 />
               } 
@@ -66,7 +76,7 @@ function App() {
                 <Actividades 
                   actividades={actividades} 
                   onEliminar={eliminarActividad}
-                  loading={loading}
+                  loading={actividadesLoading}
                   error={error}
                   onRegistrarActividad={abrirModalConDatos}
                 />

@@ -44,19 +44,18 @@ function Actividades({ actividades, onEliminar, loading, error, onRegistrarActiv
     })
   }
 
-  const handleSeleccionarDeporte = (sport) => {
-    const tipo = mapearTipoDeporte(sport.strSport)
-    onRegistrarActividad({
-      tipo,
-      nombre: sport.strSport,
-      deporte: sport.strSport,
-      distancia: '',
-      duracion: '',
-      ritmo: '',
-      tag: 'Entrenamiento',
-      tagType: ''
-    })
-  }
+  const handleSeleccionarDeporte = (deporte) => {
+  onRegistrarActividad({
+    tipo: deporte.tipo,
+    deporte: deporte.nombre,
+    nombre: deporte.nombre,
+    distancia: '',
+    duracion: '',
+    ritmo: '',
+    tag: 'Entrenamiento',
+    tagType: ''
+  })
+}
 
   const mapearTipoDeporte = (sportName = '') => {
     const name = sportName.toLowerCase()
