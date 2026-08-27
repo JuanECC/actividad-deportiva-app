@@ -1,10 +1,8 @@
-// frontend/src/components/Sidebar.jsx
-import React, { useState } from 'react'
+import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 function Sidebar() {
-  const [paginaActiva, setPaginaActiva] = useState('panel')
   const { currentUser, logout } = useAuth()
   const location = useLocation()
 
@@ -12,6 +10,7 @@ function Sidebar() {
     { id: 'panel', label: 'Panel', path: '/', icon: 'panel' },
     { id: 'actividades', label: 'Actividades', path: '/actividades', icon: 'actividades' },
     { id: 'progreso', label: 'Progreso', path: '/progreso', icon: 'progreso' },
+    { id: 'sueno', label: 'Sueño', path: '/sueno', icon: 'sueno' },
     { id: 'objetivos', label: 'Objetivos', path: '/objetivos', icon: 'objetivos' },
     { id: 'ajustes', label: 'Ajustes', path: '/ajustes', icon: 'ajustes' }
   ]
@@ -20,9 +19,17 @@ function Sidebar() {
     panel: <svg viewBox="0 0 24 24" fill="none"><path d="M3 13h4v8H3v-8Zm7-7h4v15h-4V6Zm7 4h4v11h-4V10Z" fill="currentColor"/></svg>,
     actividades: <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" fill="currentColor"/></svg>,
     progreso: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/><path d="M12 7v5l3.5 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>,
+    sueno: <svg viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
     objetivos: <svg viewBox="0 0 24 24" fill="none"><path d="M12 2 2 7l10 5 10-5-10-5Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>,
     ajustes: <svg viewBox="0 0 24 24" fill="none"><path d="M4 21v-6M4 11V3M12 21v-9M12 8V3M20 21v-4M20 13V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><circle cx="4" cy="13" r="2" fill="currentColor"/><circle cx="12" cy="10" r="2" fill="currentColor"/><circle cx="20" cy="15" r="2" fill="currentColor"/></svg>
   }
+
+  const getActivePage = () => {
+    const currentItem = menuItems.find(item => item.path === location.pathname)
+    return currentItem ? currentItem.id : 'panel'
+  }
+
+  const activePage = getActivePage()
 
   const handleLogout = async () => {
     try {
@@ -31,14 +38,6 @@ function Sidebar() {
       console.error('Error al cerrar sesión:', error)
     }
   }
-
-  // Determinar página activa según la ruta actual
-  const getActivePage = () => {
-    const currentItem = menuItems.find(item => item.path === location.pathname)
-    return currentItem ? currentItem.id : 'panel'
-  }
-
-  const activePage = getActivePage()
 
   return (
     <aside className="sidebar">
@@ -53,7 +52,6 @@ function Sidebar() {
             key={item.id}
             to={item.path}
             className={`nav__item ${activePage === item.id ? 'nav__item--active' : ''}`}
-            onClick={() => setPaginaActiva(item.id)}
           >
             <span className="nav__icon" aria-hidden="true">
               {iconMap[item.icon]}
@@ -75,13 +73,9 @@ function Sidebar() {
             <span className="profile__plan">Racha de 12 días</span>
           </div>
         </div>
-        <button 
-          className="logout-btn" 
-          onClick={handleLogout}
-          title="Cerrar sesión"
-        >
+        <button className="logout-btn" onClick={handleLogout} title="Cerrar sesión">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" 
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"
               stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
           Cerrar sesión

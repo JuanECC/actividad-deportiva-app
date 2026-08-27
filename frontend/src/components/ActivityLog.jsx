@@ -35,7 +35,12 @@ function ActivityLog({ actividades, onEliminar, mostrarTipo = false }) {
   }
 
   const formatearDistancia = (act) => {
-    if (act.tipo === 'strength') return `${act.distancia} ejerc.`
+    if (act.tipo === 'strength') {
+      if (act.modoFuerza === 'tiempo') {
+        return `${act.distancia} min`
+      }
+      return `${act.distancia} rondas`
+    }
     if (act.tipo === 'sport') return act.distancia
     return act.distancia
   }

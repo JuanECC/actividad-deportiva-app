@@ -1,11 +1,9 @@
-// frontend/src/pages/Panel.jsx
 import React from 'react'
 import Scoreboard from '../components/Scoreboard'
 import ActivityLog from '../components/ActivityLog'
 import SideColumn from '../components/SideColumn'
-import TestApi from '../components/TestApi'
 
-function Panel({ actividades, onEliminar, loading, error }) {
+function Panel({ actividades, onEliminar, loading, error, rangoActivo }) {
   if (loading) {
     return (
       <div className="loading-container">
@@ -25,15 +23,11 @@ function Panel({ actividades, onEliminar, loading, error }) {
 
   return (
     <>
-      <Scoreboard actividades={actividades} />
+      <Scoreboard actividades={actividades} rangoActivo={rangoActivo} />
       <div className="grid">
-        <ActivityLog 
-          actividades={actividades} 
-          onEliminar={onEliminar}
-        />
-        <SideColumn actividades={actividades} />
+        <ActivityLog actividades={actividades} onEliminar={onEliminar} />
+        <SideColumn actividades={actividades} rangoActivo={rangoActivo} />
       </div>
-      <TestApi />
     </>
   )
 }

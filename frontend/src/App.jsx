@@ -7,10 +7,12 @@ import Login from './components/Login'
 import Panel from './pages/Panel'
 import Actividades from './pages/Actividades'
 import Progreso from './pages/Progreso'
+import Sueno from './pages/Sueno'
 import Objetivos from './pages/Objetivos'
 import Ajustes from './pages/Ajustes'
 import { useAuth } from './context/AuthContext'
 import { useActividades } from './hooks/useActividades'
+import { usePerfil } from './hooks/usePerfil'
 import './App.css'
 
 function App() {
@@ -27,8 +29,11 @@ function App() {
     desmarcarSesion
   } = useActividades()
 
+  const { nombre, guardarNombre } = usePerfil()
+
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalInitialData, setModalInitialData] = useState(null)
+  const [rangoActivo, setRangoActivo] = useState('Semana')
 
   const abrirModalConDatos = (data) => {
     setModalInitialData(data)
@@ -53,12 +58,26 @@ function App() {
     return <Login />
   }
 
+  const hoy = new Date()
+  const sesionesHoy = sesiones.filter(s => {
+    const f = new Date(s.fecha)
+    return f.getDate() === hoy.getDate() &&
+           f.getMonth() === hoy.getMonth() &&
+           f.getFullYear() === hoy.getFullYear()
+  })
+
   return (
     <BrowserRouter>
       <div className="app">
         <Sidebar />
         <main className="main">
-          <Topbar onRegistrar={() => abrirModalConDatos(null)} />
+          <Topbar
+            onRegistrar={() => abrirModalConDatos(null)}
+            rangoActivo={rangoActivo}
+            onCambiarRango={setRangoActivo}
+            nombreUsuario={nombre}
+            sesionesHoy={sesionesHoy}
+          />
 
           <Routes>
             <Route
@@ -69,6 +88,7 @@ function App() {
                   onEliminar={eliminarActividad}
                   loading={actividadesLoading}
                   error={error}
+                  rangoActivo={rangoActivo}
                 />
               }
             />
@@ -96,12 +116,16 @@ function App() {
               }
             />
             <Route
+              path="/sueno"
+              element={<Sueno />}
+            />
+            <Route
               path="/objetivos"
-              element={<Objetivos actividades={sesiones} />}
+              element={<Objetivos actividades={sesiones} rangoActivo={rangoActivo} />}
             />
             <Route
               path="/ajustes"
-              element={<Ajustes />}
+              element={<Ajustes nombre={nombre} onGuardarNombre={guardarNombre} />}
             />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

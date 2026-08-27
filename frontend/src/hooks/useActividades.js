@@ -33,15 +33,16 @@ export function useActividades() {
     const actividadesRef = collection(db, 'users', currentUser.uid, 'actividades')
     const q = query(actividadesRef, orderBy('fecha', 'desc'))
 
-    const unsubscribe = onSnapshot(q,
+    const unsubscribe = onSnapshot(
+      q,
       (snapshot) => {
-        const all = snapshot.docs.map(doc => ({
+        const all = snapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }))
         setActividades(all)
-        setPlanes(all.filter(a => a.esPlan === true))
-        setSesiones(all.filter(a => a.esPlan !== true))
+        setPlanes(all.filter((a) => a.esPlan === true))
+        setSesiones(all.filter((a) => a.esPlan !== true))
         setLoading(false)
       },
       (err) => {
@@ -56,7 +57,7 @@ export function useActividades() {
 
   const actualizarEstadoPlan = async (planId, sesionesDelPlan) => {
     if (!currentUser) return
-    const plan = planes.find(p => p.id === planId)
+    const plan = planes.find((p) => p.id === planId)
     if (!plan) return
 
     const totalSesiones = plan.diasSeleccionados.length * plan.semanas
@@ -77,14 +78,18 @@ export function useActividades() {
 
     try {
       const actividadesRef = collection(db, 'users', currentUser.uid, 'actividades')
-      const esPlan = nuevaActividad.diasSeleccionados && nuevaActividad.diasSeleccionados.length > 0
+      const esPlan =
+        nuevaActividad.diasSeleccionados &&
+        nuevaActividad.diasSeleccionados.length > 0
 
       const datos = {
         ...nuevaActividad,
         esPlan,
         completado: false,
-        fecha: esPlan ? nuevaActividad.fechaInicio || new Date().toISOString() : nuevaActividad.fecha,
-        planId: esPlan ? null : nuevaActividad.planId || null
+        fecha: esPlan
+          ? nuevaActividad.fechaInicio || new Date().toISOString()
+          : nuevaActividad.fecha,
+        planId: esPlan ? null : nuevaActividad.planId || null,
       }
 
       await addDoc(actividadesRef, datos)
@@ -102,8 +107,11 @@ export function useActividades() {
         tipo: plan.tipo,
         deporte: plan.deporte,
         nombre: plan.nombre,
-        fecha: fecha,
-        meta: `Completado · ${new Date(fecha).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}`,
+        fecha: new Date().toISOString(), // ✅ FECHA REAL
+        meta: `Completado · ${new Date().toLocaleDateString('es-ES', {
+          day: '2-digit',
+          month: 'short',
+        })}`,
         distancia: plan.distancia,
         duracion: plan.duracion,
         ritmo: plan.ritmo,
@@ -112,10 +120,10 @@ export function useActividades() {
         diasSeleccionados: [],
         semanas: 1,
         esPlan: false,
-        planId: plan.id
+        planId: plan.id,
       })
 
-      const sesionesDelPlan = sesiones.filter(s => s.planId === plan.id)
+      const sesionesDelPlan = sesiones.filter((s) => s.planId === plan.id)
       sesionesDelPlan.push({ planId: plan.id })
       await actualizarEstadoPlan(plan.id, sesionesDelPlan)
     } catch (err) {
@@ -127,19 +135,23 @@ export function useActividades() {
   const desmarcarSesion = async (plan, fecha) => {
     if (!currentUser) return
     try {
-      const sesion = sesiones.find(s => {
+      const sesion = sesiones.find((s) => {
         if (s.planId !== plan.id) return false
         const f1 = new Date(s.fecha)
         const f2 = new Date(fecha)
-        return f1.getDate() === f2.getDate() &&
-               f1.getMonth() === f2.getMonth() &&
-               f1.getFullYear() === f2.getFullYear()
+        return (
+          f1.getDate() === f2.getDate() &&
+          f1.getMonth() === f2.getMonth() &&
+          f1.getFullYear() === f2.getFullYear()
+        )
       })
       if (sesion) {
         const sesionRef = doc(db, 'users', currentUser.uid, 'actividades', sesion.id)
         await deleteDoc(sesionRef)
 
-        const sesionesDelPlan = sesiones.filter(s => s.planId === plan.id && s.id !== sesion.id)
+        const sesionesDelPlan = sesiones.filter(
+          (s) => s.planId === plan.id && s.id !== sesion.id
+        )
         await actualizarEstadoPlan(plan.id, sesionesDelPlan)
       }
     } catch (err) {
@@ -168,6 +180,6 @@ export function useActividades() {
     agregarActividad,
     eliminarActividad,
     marcarSesion,
-    desmarcarSesion
+    desmarcarSesion,
   }
 }

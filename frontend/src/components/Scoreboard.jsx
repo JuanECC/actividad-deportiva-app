@@ -8,45 +8,81 @@ function calcularDistancia(act) {
   return valor
 }
 
-function Scoreboard({ actividades }) {
+function parsearDuracion(duracion) {
+  if (!duracion) return 0
+  const v = String(duracion).trim().toLowerCase()
+  const partes = v.split(':')
+  if (partes.length === 2) {
+    const horas = parseInt(partes[0], 10)
+    const minutos = parseInt(partes[1], 10) || 0
+    return horas * 60 + minutos
+  }
+  let total = 0
+  const matchH = v.match(/(\d+)\s*(h|hr|hrs|horas?)/)
+  if (matchH) total += parseInt(matchH[1], 10) * 60
+  const matchM = v.match(/(\d+)\s*(min|mins?)/)
+  if (matchM) total += parseInt(matchM[1], 10)
+  return total
+}
+
+function Scoreboard({ actividades, rangoActivo }) {
   const stats = useMemo(() => {
     const hoy = new Date()
     hoy.setHours(0, 0, 0, 0)
+    const finHoy = new Date()
+    finHoy.setHours(23, 59, 59, 999)
 
-    const hace7Dias = new Date(hoy)
-    hace7Dias.setDate(hoy.getDate() - 6)
+    const diaSemana = hoy.getDay() || 7
+    const inicioSemana = new Date(hoy)
+    inicioSemana.setDate(hoy.getDate() - (diaSemana - 1))
 
-    const hace14Dias = new Date(hoy)
-    hace14Dias.setDate(hoy.getDate() - 13)
+    const finSemanaAnterior = new Date(inicioSemana)
+    finSemanaAnterior.setDate(inicioSemana.getDate() - 1)
+    const inicioSemanaAnterior = new Date(finSemanaAnterior)
+    inicioSemanaAnterior.setDate(inicioSemanaAnterior.getDate() - 6)
 
-    const filtrarPorRango = (inicio, fin) =>
-      actividades.filter(act => {
-        const fecha = new Date(act.fecha)
-        return fecha >= inicio && fecha <= fin
-      })
+    const filtrarPorRango = (lista, rango) => {
+      if (rango === 'Semana') {
+        return lista.filter(act => {
+          const f = new Date(act.fecha)
+          return f >= inicioSemana && f <= finHoy
+        })
+      }
+      if (rango === 'Mes') {
+        return lista.filter(act => {
+          const f = new Date(act.fecha)
+          return f.getMonth() === hoy.getMonth() && f.getFullYear() === hoy.getFullYear()
+        })
+      }
+      if (rango === 'Año') {
+        return lista.filter(act => {
+          const f = new Date(act.fecha)
+          return f.getFullYear() === hoy.getFullYear()
+        })
+      }
+      return lista
+    }
 
-    const actSemana = filtrarPorRango(hace7Dias, hoy)
-    const actSemanaAnterior = filtrarPorRango(hace14Dias, hace7Dias)
+    const actividadesFiltradas = filtrarPorRango(actividades, rangoActivo)
+
+    const actSemana = actividades.filter(act => {
+      const f = new Date(act.fecha)
+      return f >= inicioSemana && f <= finHoy
+    })
+    const actSemanaAnterior = actividades.filter(act => {
+      const f = new Date(act.fecha)
+      return f >= inicioSemanaAnterior && f <= finSemanaAnterior
+    })
 
     const distanciaSemana = actSemana.reduce((sum, act) => sum + calcularDistancia(act), 0)
     const distanciaSemanaAnterior = actSemanaAnterior.reduce((sum, act) => sum + calcularDistancia(act), 0)
 
-    const totalMinutos = actividades.reduce((sum, act) => {
-      const duracion = String(act.duracion || '')
-      const partes = duracion.split(':')
-      if (partes.length >= 2) {
-        const minutos = parseInt(partes[0], 10)
-        const segundos = parseInt(partes[1], 10) || 0
-        return sum + minutos + segundos / 60
-      }
-      return sum
-    }, 0)
-
-    const horas = Math.floor(totalMinutos / 60)
-    const minutos = Math.round(totalMinutos % 60)
+    const tiempoTotalMin = actividadesFiltradas.reduce((sum, act) => sum + parsearDuracion(act.duracion), 0)
+    const horas = Math.floor(tiempoTotalMin / 60)
+    const minutos = Math.round(tiempoTotalMin % 60)
     const tiempoTotal = `${horas}h ${minutos.toString().padStart(2, '0')}min`
 
-    const ritmos = actividades
+    const ritmos = actividadesFiltradas
       .filter(act => act.ritmo && act.ritmo.includes(':'))
       .map(act => {
         const [min, seg] = act.ritmo.split(':')
@@ -74,8 +110,8 @@ function Scoreboard({ actividades }) {
 
     const dias = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
     const distPorDia = dias.map((_, i) => {
-      const d = new Date(hoy)
-      d.setDate(hoy.getDate() - (6 - i))
+      const d = new Date(inicioSemana)
+      d.setDate(inicioSemana.getDate() + i)
       const actsDia = actividades.filter(act => {
         const f = new Date(act.fecha)
         return f.getDate() === d.getDate() && f.getMonth() === d.getMonth() && f.getFullYear() === d.getFullYear()
@@ -91,11 +127,11 @@ function Scoreboard({ actividades }) {
       tiempoTotal,
       ritmoPromedio,
       racha,
-      totalSesiones: actividades.length,
+      totalSesiones: actividadesFiltradas.length,
       barras,
       dias
     }
-  }, [actividades])
+  }, [actividades, rangoActivo])
 
   return (
     <section className="scoreboard" aria-label="Resumen de la semana">
@@ -144,7 +180,7 @@ function Scoreboard({ actividades }) {
           <span className="stat-card__number stat-card__number--mono">{stats.ritmoPromedio}</span>
           <span className="stat-card__unit">/km</span>
         </div>
-        <p className="stat-card__foot">Basado en {actividades.length} actividad(es)</p>
+        <p className="stat-card__foot">Basado en {stats.totalSesiones} actividad(es)</p>
       </div>
 
       <div className="stat-card stat-card--accent">

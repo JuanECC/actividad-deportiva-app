@@ -21,10 +21,18 @@ const camposPorTipo = {
     ritmoPlaceholder: 'Ej: 2:07'
   },
   strength: {
-    distanciaLabel: 'Nº ejercicios',
-    distanciaPlaceholder: 'Ej: 5',
-    ritmoLabel: 'Peso total (kg)',
-    ritmoPlaceholder: 'Ej: 4200'
+    rounds: {
+      distanciaLabel: 'Número de rondas',
+      distanciaPlaceholder: 'Ej: 5',
+      ritmoLabel: 'Descanso (seg)',
+      ritmoPlaceholder: 'Ej: 60'
+    },
+    tiempo: {
+      distanciaLabel: 'Tiempo por round (min)',
+      distanciaPlaceholder: 'Ej: 3',
+      ritmoLabel: 'Descanso (seg)',
+      ritmoPlaceholder: 'Ej: 60'
+    }
   },
   sport: {
     distanciaLabel: 'Puntuación / Goles',
@@ -42,7 +50,8 @@ const formInitial = {
   duracion: '',
   ritmo: '',
   tag: 'Entrenamiento',
-  tagType: ''
+  tagType: '',
+  modoFuerza: 'rounds'
 }
 
 const diasSemana = [
@@ -63,16 +72,20 @@ const normalizarDistancia = (valor, tipo) => {
 
 const normalizarDuracion = (valor) => {
   const v = valor.trim().toLowerCase()
-  if (v.includes(':')) return valor.trim()
-
+  if (v.includes(':')) {
+    const [h, m] = v.split(':')
+    return `${h}:${m.padStart(2, '0')}`
+  }
   const matchH = v.match(/(\d+)\s*(h|hr|hrs|horas?)/)
   if (matchH) return `${matchH[1]}:00`
-
   const matchM = v.match(/(\d+)\s*(min|mins?)/)
-  if (matchM) return `0:${matchM[1].padStart(2, '0')}`
-
+  if (matchM) {
+    const totalMin = parseInt(matchM[1], 10)
+    const h = Math.floor(totalMin / 60)
+    const m = totalMin % 60
+    return `${h}:${m.toString().padStart(2, '0')}`
+  }
   if (!isNaN(v) && v !== '') return `0:${v.padStart(2, '0')}`
-
   return valor.trim()
 }
 
@@ -83,6 +96,7 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
   const [errorGuardado, setErrorGuardado] = useState('')
   const [diasSeleccionados, setDiasSeleccionados] = useState([])
   const [semanas, setSemanas] = useState(1)
+  const [modoFuerza, setModoFuerza] = useState('rounds')
 
   const tiposActividad = [
     { id: 'run', label: '🏃 Carrera' },
@@ -107,10 +121,12 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
         setFormData({ ...formInitial, ...initialData })
         setDiasSeleccionados(initialData.diasSeleccionados || [])
         setSemanas(initialData.semanas || 1)
+        setModoFuerza(initialData.modoFuerza || 'rounds')
       } else {
         setFormData(formInitial)
         setDiasSeleccionados([])
         setSemanas(1)
+        setModoFuerza('rounds')
       }
       setErrors({})
       setErrorGuardado('')
@@ -126,7 +142,9 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
     }
   }, [formData.deporte])
 
-  const campos = camposPorTipo[formData.tipo] || camposPorTipo.sport
+  const campos = formData.tipo === 'strength'
+    ? camposPorTipo.strength[modoFuerza]
+    : camposPorTipo[formData.tipo] || camposPorTipo.sport
 
   const toggleDia = (dia) => {
     setDiasSeleccionados(prev =>
@@ -170,7 +188,8 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
       tag: formData.tag,
       tagType: formData.tag === 'Récord' ? 'pr' : '',
       diasSeleccionados,
-      semanas
+      semanas,
+      modoFuerza: formData.tipo === 'strength' ? modoFuerza : undefined
     }
 
     try {
@@ -231,6 +250,22 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
             </div>
           </div>
 
+          {formData.tipo === 'strength' && (
+            <div className="modal-field">
+              <label htmlFor="modoFuerza">Tipo de registro</label>
+              <select
+                id="modoFuerza"
+                name="modoFuerza"
+                value={modoFuerza}
+                onChange={(e) => setModoFuerza(e.target.value)}
+                disabled={guardando}
+              >
+                <option value="rounds">Por rondas</option>
+                <option value="tiempo">Por tiempo</option>
+              </select>
+            </div>
+          )}
+
           <div className="modal-field">
             <label>Días de la semana</label>
             <div className="dias-semana">
@@ -268,7 +303,7 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
               id="nombre"
               name="nombre"
               type="text"
-              placeholder="Ej: Carrera matutina — Parque Central"
+              placeholder="Ej: Rutina de empuje"
               value={formData.nombre}
               onChange={handleChange}
               className={errors.nombre ? 'error' : ''}

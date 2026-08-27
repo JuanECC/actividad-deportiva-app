@@ -1316,3 +1316,55 @@ svg { display: block; }
   font-weight: 700;
   margin: 16px 0 8px;
 }
+.sueno-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sueno-mensaje {
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sueno-resumen p {
+  margin: 4px 0;
+  color: var(--text-muted);
+}
+
+.sueno-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sueno-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+
+.calidad {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.calidad--excelente { background: rgba(203,255,77,0.15); color: var(--accent); }
+.calidad--buena { background: rgba(110,168,255,0.15); color: var(--info); }
+.calidad--regular { background: rgba(255,91,60,0.15); color: var(--alert); }
+.calidad--pobre { background: rgba(255,91,60,0.3); color: var(--alert); }
+.topbar__mensaje {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
