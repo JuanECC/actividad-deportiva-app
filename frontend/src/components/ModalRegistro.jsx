@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { deportes } from '../utils/deportes'
+import { actividadSchema, validarConZod } from '../utils/validations'
 
 const camposPorTipo = {
   run: {
@@ -164,14 +165,18 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
     e.preventDefault()
     setErrorGuardado('')
 
-    const newErrors = {}
-    if (!formData.nombre.trim()) newErrors.nombre = 'El nombre es obligatorio'
-    if (!formData.distancia.trim()) newErrors.distancia = 'Este campo es obligatorio'
-    if (!formData.duracion.trim()) newErrors.duracion = 'La duración es obligatoria'
-    if (!formData.ritmo.trim()) newErrors.ritmo = 'Este campo es obligatorio'
+    const { ok, errors: zodErrors } = validarConZod(actividadSchema, {
+      tipo: formData.tipo,
+      deporte: formData.deporte || 'sin_deporte',
+      nombre: formData.nombre,
+      distancia: formData.distancia,
+      duracion: formData.duracion,
+      ritmo: formData.ritmo,
+      tag: formData.tag
+    })
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
+    if (!ok) {
+      setErrors(zodErrors)
       return
     }
 
@@ -231,6 +236,7 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
                 </option>
               ))}
             </select>
+            {errors.deporte && <span className="modal-error">{errors.deporte}</span>}
           </div>
 
           <div className="modal-field">
@@ -303,7 +309,7 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
               id="nombre"
               name="nombre"
               type="text"
-              placeholder="Ej: Rutina de empuje"
+              placeholder="Ej: Carrera matutina — Parque Central"
               value={formData.nombre}
               onChange={handleChange}
               className={errors.nombre ? 'error' : ''}

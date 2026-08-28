@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useSueno } from '../hooks/useSueno'
+import { suenoSchema, validarConZod } from '../utils/validations'
 
 function RegistroSueno() {
   const { registros, agregarSueno, eliminarSueno } = useSueno()
@@ -11,8 +12,15 @@ function RegistroSueno() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setMensaje('')
-    if (!fecha || !horaDormir || !horaDespertar) {
-      setMensaje('Completa todos los campos')
+
+    const { ok, errors } = validarConZod(suenoSchema, {
+      fecha,
+      horaDormir,
+      horaDespertar,
+    })
+
+    if (!ok) {
+      setMensaje(Object.values(errors).join(' · '))
       return
     }
 
