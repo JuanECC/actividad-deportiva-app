@@ -1,18 +1,9 @@
-// frontend/src/services/apiClient.js
-// Cliente HTTP base para consumir APIs
-
 const API_BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
 const API_WGER_URL = import.meta.env.VITE_API_URL || 'https://wger.de/api/v2'
 
-/**
- * Cliente HTTP genérico
- * @param {string} endpoint - Ruta del endpoint
- * @param {Object} options - Opciones de fetch
- * @param {string} baseUrl - URL base (por defecto Wger)
- */
 export async function apiClient(endpoint, options = {}, baseUrl = API_WGER_URL) {
   const url = `${baseUrl}${endpoint}`
-  
+
   const defaultHeaders = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -30,12 +21,23 @@ export async function apiClient(endpoint, options = {}, baseUrl = API_WGER_URL) 
     const response = await fetch(url, config)
 
     if (!response.ok) {
-      throw new Error(`Error ${response.status}: ${response.statusText}`)
+      let mensaje = `Error ${response.status}: ${response.statusText}`
+      try {
+        const data = await response.json()
+        mensaje = data.message || data.error || mensaje
+      } catch {
+        // no JSON
+      }
+      const error = new Error(mensaje)
+      error.status = response.status
+      throw error
     }
 
-    const data = await response.json()
-    return data
+    return await response.json()
   } catch (error) {
+    if (error.name === 'TypeError' || error.message === 'Failed to fetch') {
+      error.message = 'No se pudo conectar con el servidor. Revisa tu conexión.'
+    }
     console.error(`[apiClient] Error en ${endpoint}:`, error.message)
     throw error
   }
@@ -52,7 +54,6 @@ export function post(endpoint, body, baseUrl) {
   }, baseUrl)
 }
 
-// Función específica para llamar al backend propio
 export async function getBackendHealth() {
   return get('/api/health', API_BACKEND_URL)
 }

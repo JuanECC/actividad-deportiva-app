@@ -62,7 +62,86 @@ function Login() {
   return (
     <div className="login-overlay">
       <div className="login-container">
-        {/* ... resto del JSX sin cambios ... */}
+        <div className="login-header">
+          <div className="brand">
+            <span className="brand__mark">S/</span>
+            <span className="brand__name">SPLIT</span>
+          </div>
+          <h1 className="login-title">
+            {isRegister ? 'Crear cuenta' : 'Bienvenido de nuevo'}
+          </h1>
+          <p className="login-subtitle">
+            {isRegister
+              ? 'Regístrate para comenzar a registrar tus actividades deportivas'
+              : 'Inicia sesión para ver tu panel de actividades'}
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="modal-field">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              placeholder="tu@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="modal-field">
+            <label htmlFor="password">Contraseña</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          {isRegister && (
+            <div className="modal-field">
+              <label htmlFor="confirmPassword">Confirmar contraseña</label>
+              <input
+                id="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
+          )}
+
+          {error && (
+            <div className="login-error">
+              <span>⚠️ {error}</span>
+            </div>
+          )}
+
+          <button type="submit" className="btn btn--primary login-submit" disabled={loading}>
+            {loading
+              ? 'Procesando...'
+              : isRegister ? 'Crear cuenta' : 'Iniciar sesión'}
+          </button>
+        </form>
+
+        <div className="login-footer">
+          <button
+            className="login-toggle"
+            onClick={() => {
+              setIsRegister(!isRegister)
+              setError('')
+            }}
+          >
+            {isRegister
+              ? '¿Ya tienes cuenta? Inicia sesión'
+              : '¿No tienes cuenta? Regístrate'}
+          </button>
+        </div>
       </div>
     </div>
   )
