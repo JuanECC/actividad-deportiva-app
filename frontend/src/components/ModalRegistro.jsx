@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { deportes } from '../utils/deportes'
 import { actividadSchema, validarConZod } from '../utils/validations'
 
@@ -147,19 +147,19 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
     ? camposPorTipo.strength[modoFuerza]
     : camposPorTipo[formData.tipo] || camposPorTipo.sport
 
-  const toggleDia = (dia) => {
+  const toggleDia = useCallback((dia) => {
     setDiasSeleccionados(prev =>
       prev.includes(dia) ? prev.filter(d => d !== dia) : [...prev, dia]
     )
-  }
+  }, [])
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }))
     }
-  }
+  }, [errors])
 
   const handleSubmit = async (e) => {
     e.preventDefault()

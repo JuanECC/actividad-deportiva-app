@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 
 function ActivityLog({ actividades, onEliminar, mostrarTipo = false }) {
   const iconMap = {
@@ -60,11 +60,11 @@ function ActivityLog({ actividades, onEliminar, mostrarTipo = false }) {
     return duracion
   }
 
-  const handleEliminar = (id, nombre) => {
+  const handleEliminar = useCallback((id, nombre) => {
     if (window.confirm(`¿Eliminar "${nombre}"?`)) {
       onEliminar(id)
     }
-  }
+  }, [onEliminar])
 
   if (actividades.length === 0) {
     return (
