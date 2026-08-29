@@ -181,21 +181,21 @@ function ModalRegistro({ isOpen, onClose, onRegistrar, initialData }) {
     }
 
     const nuevaActividad = {
-      tipo: formData.tipo,
-      deporte: formData.deporte,
-      nombre: formData.nombre.trim(),
-      fecha: new Date().toISOString(),
-      fechaInicio: new Date().toISOString(),
-      meta: `Hoy · ${new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`,
-      distancia: normalizarDistancia(formData.distancia, formData.tipo),
-      duracion: normalizarDuracion(formData.duracion),
-      ritmo: formData.ritmo.trim(),
-      tag: formData.tag,
-      tagType: formData.tag === 'Récord' ? 'pr' : '',
-      diasSeleccionados,
-      semanas,
-      modoFuerza: formData.tipo === 'strength' ? modoFuerza : undefined
-    }
+  tipo: formData.tipo,
+  deporte: formData.deporte,
+  nombre: formData.nombre.trim(),
+  fecha: new Date().toISOString(),
+  fechaInicio: new Date().toISOString(),
+  meta: `Hoy · ${new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`,
+  distancia: normalizarDistancia(formData.distancia, formData.tipo),
+  duracion: normalizarDuracion(formData.duracion),
+  ritmo: formData.ritmo.trim(),
+  tag: formData.tag,
+  tagType: formData.tag === 'Récord' ? 'pr' : '',
+  diasSeleccionados,
+  semanas,
+  ...(formData.tipo === 'strength' ? { modoFuerza } : {})
+}
 
     try {
       setGuardando(true)
