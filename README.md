@@ -1,26 +1,44 @@
-Monorepo con frontend (React + Vite) y backend (Node.js + Express).
+# 🏃 SPLIT — Registro de entrenamientos
+
+Monorepo con frontend **React + Vite** y backend **Express opcional**.
 
 ## 📁 Estructura
+
+```text
 actividad-deportiva-app/
-├── frontend/ → React + Vite + Firebase
-├── backend/ → Node.js + Express
+├── frontend/              → React + Vite + Firebase
+├── backend/               → Express (health check)
 └── README.md
+```
 
 ## 🚀 Instalación
 
 ### Frontend
+
 ```bash
 cd frontend
 npm install
 npm run dev
+```
 
-### Backend
+### Backend (opcional)
+
+```bash
 cd backend
 npm install
 npm run dev
+```
 
-📡 API
-Backend: http://localhost:5000/api/health
+## 🌐 Producción
 
-Frontend: http://localhost:5173
-EOF
+Aplicación desplegada en Vercel:
+
+**https://actividad-deportiva-app.vercel.app**
+
+## 📚 Documentación
+
+* [`frontend/docs/API.md`](frontend/docs/API.md)
+* [`frontend/docs/ARQUITECTURA.md`](frontend/docs/ARQUITECTURA.md)
+* [`frontend/docs/ERRORES.md`](frontend/docs/ERRORES.md)
+* [`frontend/docs/OPTIMIZACION.md`](frontend/docs/OPTIMIZACION.md)
+* [`frontend/docs/SEGURIDAD.md`](frontend/docs/SEGURIDAD.md)
