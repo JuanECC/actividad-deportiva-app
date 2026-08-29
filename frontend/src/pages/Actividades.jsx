@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import ActivityLog from '../components/ActivityLog'
 import ExerciseCard from '../components/ExerciseCard'
 import ExerciseFilters from '../components/ExerciseFilters'
@@ -51,7 +51,10 @@ function Actividades({ actividades, onEliminar, loading, error, onRegistrarActiv
   const { categorias } = useCategorias()
   const { equipamiento } = useEquipamiento()
 
-  const { planes, individuales, sesionesPorPlan } = agruparActividades(actividades)
+  const { planes, individuales, sesionesPorPlan } = useMemo(
+    () => agruparActividades(actividades),
+    [actividades]
+  )
 
   const handleSeleccionarEjercicio = (ejercicio) => {
     const tipo = mapearTipoEjercicio(ejercicio.category)
@@ -98,12 +101,13 @@ function Actividades({ actividades, onEliminar, loading, error, onRegistrarActiv
           </div>
         ) : (
           <>
-            {/* Planes agrupados */}
             {planes.map(plan => {
               const sesiones = sesionesPorPlan[plan.id] || []
               const totalSesiones = plan.diasSeleccionados.length * plan.semanas
               const completadas = sesiones.length
-              const progreso = totalSesiones > 0 ? Math.round((completadas / totalSesiones) * 100) : 0
+              const progreso = totalSesiones > 0
+                ? Math.round((completadas / totalSesiones) * 100)
+                : 0
 
               return (
                 <div key={plan.id} className="plan-resumen">
@@ -148,7 +152,6 @@ function Actividades({ actividades, onEliminar, loading, error, onRegistrarActiv
               )
             })}
 
-            {/* Actividades individuales */}
             {individuales.length > 0 && (
               <>
                 <h3 className="actividades-subtitulo">Actividades individuales</h3>

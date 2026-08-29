@@ -45,3 +45,5 @@ desktop.ini
 
 .idea/
 *.iml
+.firebase/
+.firebaserc
