@@ -119,3 +119,4 @@ La aplicación está desplegada en Vercel:
 * [`docs/ERRORES.md`](docs/ERRORES.md) — Manejo de errores
 * [`docs/OPTIMIZACION.md`](docs/OPTIMIZACION.md) — `useMemo` y `useCallback`
 * [`docs/SEGURIDAD.md`](docs/SEGURIDAD.md) — Protección de rutas
+   

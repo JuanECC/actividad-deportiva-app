@@ -1367,4 +1367,23 @@ svg { display: block; }
   margin-top: 4px;
   font-size: 14px;
   color: var(--text-muted);
+}.exercise-card__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.exercise-card__emoji {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.exercise-card__group {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
 }
