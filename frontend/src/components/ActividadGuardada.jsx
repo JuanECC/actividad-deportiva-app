@@ -9,7 +9,7 @@ export default function ActividadGuardada({ aviso, onCerrar }) {
 
   return (
     <div className="actividad-guardada-region" role="status" aria-live="polite" aria-atomic="true">
-      {aviso && (
+      {Boolean(aviso) && (
         <div key={aviso} className="actividad-guardada">
           <svg className="actividad-guardada__icono" viewBox="0 0 40 40" fill="none" aria-hidden="true">
             <circle cx="20" cy="20" r="18" />
