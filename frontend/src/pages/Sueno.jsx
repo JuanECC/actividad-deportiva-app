@@ -1,131 +1,161 @@
-import React, { useState, useMemo } from 'react'
+import { useState, useRef } from 'react'
 import { useSueno } from '../hooks/useSueno'
-
-function Sueno() {
+import { fechaLocal, duracionTexto, filtrarRango } from '../utils/actividad'
+import { suenoSchema, validarConZod } from '../utils/validations'
+import { mensajeError } from '../utils/errores'
+import { useConfirmacion } from '../context/useConfirmacion'
+export default function Sueno() {
+  const confirmar = useConfirmacion()
   const { registros, loading, error, agregarSueno, eliminarSueno } = useSueno()
-  const [fecha, setFecha] = useState(new Date().toISOString().slice(0, 10))
-  const [horaDormir, setHoraDormir] = useState('23:00')
-  const [horaDespertar, setHoraDespertar] = useState('07:00')
-  const [mensaje, setMensaje] = useState('')
-
-  const handleSubmit = async (e) => {
+  const [form, setForm] = useState({
+      fecha: fechaLocal(),
+      horaDormir: '23:00',
+      horaDespertar: '07:00',
+    }),
+    [message, setMessage] = useState(''),
+    [failure, setFailure] = useState(''),
+    [pending, setPending] = useState(''),
+    [limit, setLimit] = useState(10),
+    busy = useRef(false)
+  const submit = async (e) => {
     e.preventDefault()
-    setMensaje('')
-    if (!fecha || !horaDormir || !horaDespertar) {
-      setMensaje('Completa todos los campos')
+    if (busy.current) return
+    setMessage('')
+    setFailure('')
+    const result = validarConZod(suenoSchema, form)
+    if (!result.ok) {
+      setFailure(Object.values(result.errors).join(' · '))
       return
     }
-    await agregarSueno({ fecha, horaDormir, horaDespertar })
-    setFecha(new Date().toISOString().slice(0, 10))
-    setHoraDormir('23:00')
-    setHoraDespertar('07:00')
-    setMensaje('Registro de sueño guardado ✅')
-  }
-
-  const resumen = useMemo(() => {
-    if (registros.length === 0) return null
-    const totalMin = registros.reduce((sum, r) => sum + (r.duracionMinutos || 0), 0)
-    const promedioMin = Math.round(totalMin / registros.length)
-    const calidadPromedio = promedioMin >= 480 ? 'Excelente' : promedioMin >= 360 ? 'Buena' : promedioMin >= 240 ? 'Regular' : 'Pobre'
-    const ultima = registros[0]
-    return {
-      totalRegistros: registros.length,
-      promedioMin,
-      calidadPromedio,
-      ultima
+    busy.current = true
+    setPending('save')
+    try {
+      await agregarSueno(result.data)
+      setMessage('Registro guardado.')
+      setForm({
+        fecha: fechaLocal(),
+        horaDormir: '23:00',
+        horaDespertar: '07:00',
+      })
+    } catch (err) {
+      setFailure(mensajeError(err))
+    } finally {
+      busy.current = false
+      setPending('')
     }
-  }, [registros])
-
+  }
+  const remove = async (r) => {
+    if (
+      busy.current ||
+      !(await confirmar('¿Eliminar el sueño del ' + r.fecha + '? Esta acción no se puede deshacer.'))
+    )
+      return
+    busy.current = true
+    setPending(r.id)
+    setMessage('')
+    setFailure('')
+    try {
+      await eliminarSueno(r.id)
+    } catch (err) {
+      setFailure(mensajeError(err, 'No se pudo eliminar.'))
+    } finally {
+      busy.current = false
+      setPending('')
+    }
+  }
+  const month = filtrarRango(registros, 'Mes'),
+    average = month.length
+      ? month.reduce((s, r) => s + (r.duracionMinutos || 0), 0) / month.length
+      : 0
   return (
-    <section aria-label="Registro de sueño">
+    <section>
       <div className="panel">
-        <div className="panel__header">
-          <h2 className="panel__title">😴 Registro de sueño</h2>
-        </div>
-
-        <form onSubmit={handleSubmit} className="sueno-form">
+        <h2>Registro de sueño</h2>
+        <p className="help-text">
+          Usa la fecha en que despertaste. Se permite un registro por fecha.
+        </p>
+        <form className="modal-form" onSubmit={submit}>
           <div className="modal-row">
-            <div className="modal-field">
-              <label htmlFor="fechaSueno">Fecha</label>
-              <input
-                id="fechaSueno"
-                type="date"
-                value={fecha}
-                onChange={(e) => setFecha(e.target.value)}
-              />
-            </div>
-            <div className="modal-field">
-              <label htmlFor="horaDormir">Hora de dormir</label>
-              <input
-                id="horaDormir"
-                type="time"
-                value={horaDormir}
-                onChange={(e) => setHoraDormir(e.target.value)}
-              />
-            </div>
-            <div className="modal-field">
-              <label htmlFor="horaDespertar">Hora de despertar</label>
-              <input
-                id="horaDespertar"
-                type="time"
-                value={horaDespertar}
-                onChange={(e) => setHoraDespertar(e.target.value)}
-              />
-            </div>
+            {[
+              ['fecha', 'Fecha al despertar', 'date'],
+              ['horaDormir', 'Hora de dormir', 'time'],
+              ['horaDespertar', 'Hora de despertar', 'time'],
+            ].map(([key, label, type]) => (
+              <div className="modal-field" key={key}>
+                <label htmlFor={'sueno-' + key}>{label}</label>
+                <input
+                  id={'sueno-' + key}
+                  type={type}
+                  value={form[key]}
+                  required
+                  max={type === 'date' ? fechaLocal() : undefined}
+                  disabled={!!pending}
+                  onChange={(e) => {
+                    setForm((f) => ({ ...f, [key]: e.target.value }))
+                    setMessage('')
+                    setFailure('')
+                  }}
+                />
+              </div>
+            ))}
           </div>
-
-          {mensaje && <p className="sueno-mensaje">{mensaje}</p>}
-
-          <button type="submit" className="btn btn--primary" style={{ marginTop: '12px' }}>
-            Guardar sueño
+          <button
+            className="btn btn--primary"
+            disabled={!!pending || loading || !!error}
+          >
+            {pending === 'save' ? 'Guardando…' : 'Guardar sueño'}
           </button>
         </form>
+        {message && <p role="status">{message}</p>}
+        {failure && (
+          <p className="login-error" role="alert">
+            {failure}
+          </p>
+        )}
       </div>
-
       {loading ? (
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Cargando registros...</p>
-        </div>
+        <p role="status">Cargando registros…</p>
       ) : error ? (
-        <div className="error-container">
-          <p>⚠️ Error: {error}</p>
-        </div>
+        <p role="alert">{error}</p>
       ) : (
         <>
-          {resumen && (
-            <div className="panel" style={{ marginTop: '16px' }}>
-              <div className="panel__header">
-                <h2 className="panel__title">Resumen</h2>
-              </div>
-              <div className="sueno-resumen">
-                <p>Total de registros: <strong>{resumen.totalRegistros}</strong></p>
-                <p>Promedio de sueño: <strong>{Math.floor(resumen.promedioMin / 60)}h {resumen.promedioMin % 60}min</strong></p>
-                <p>Calidad promedio: <strong>{resumen.calidadPromedio}</strong></p>
-                <p>Último registro: <strong>{resumen.ultima.fecha}</strong> ({resumen.ultima.horaDormir} → {resumen.ultima.horaDespertar})</p>
-              </div>
-            </div>
-          )}
-
-          <div className="panel" style={{ marginTop: '16px' }}>
-            <div className="panel__header">
-              <h2 className="panel__title">Historial reciente</h2>
-            </div>
-            {registros.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)' }}>No hay registros de sueño.</p>
-            ) : (
-              <div className="sueno-list">
-                {registros.slice(0, 10).map(reg => (
-                  <div key={reg.id} className="sueno-item">
-                    <span>📅 {reg.fecha}</span>
-                    <span>🌙 {reg.horaDormir}</span>
-                    <span>☀️ {reg.horaDespertar}</span>
-                    <span>{Math.floor(reg.duracionMinutos / 60)}h {reg.duracionMinutos % 60}min</span>
-                    <span className={`calidad calidad--${reg.calidad.toLowerCase()}`}>{reg.calidad}</span>
-                    <button className="log__delete" onClick={() => eliminarSueno(reg.id)}>✕</button>
-                  </div>
-                ))}
-              </div>
+          <div className="panel">
+            <h3>Este mes</h3>
+            <p>
+              {month.length}{' '}
+              {month.length === 1 ? 'noche registrada' : 'noches registradas'} ·
+              Promedio: {duracionTexto(average)}
+            </p>
+            <p className="help-text">
+              La duración registrada no mide la calidad del sueño.
+            </p>
+          </div>
+          <div className="panel">
+            <h3>Historial</h3>
+            {!registros.length && <p>No hay registros.</p>}
+            <ul className="sueno-list">
+              {registros.slice(0, limit).map((r) => (
+                <li className="sueno-item" key={r.id}>
+                  <span>{r.fecha}</span>
+                  <span>
+                    {r.horaDormir} → {r.horaDespertar}
+                  </span>
+                  <strong>{duracionTexto(r.duracionMinutos)}</strong>
+                  <button
+                    className="log__delete"
+                    aria-label={'Eliminar sueño del ' + r.fecha}
+                    disabled={!!pending}
+                    onClick={() => remove(r)}
+                  >
+                    {pending === r.id ? '…' : 'Eliminar'}
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {registros.length > limit && (
+              <button className="btn" onClick={() => setLimit((n) => n + 10)}>
+                Mostrar más
+              </button>
             )}
           </div>
         </>
@@ -133,5 +163,3 @@ function Sueno() {
     </section>
   )
 }
-
-export default Sueno

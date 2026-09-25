@@ -1,31 +1,44 @@
 import { useState, useEffect } from 'react'
 import { getEjercicios } from '../services/wgerApi'
-
-export function useEjercicios(filtros = {}) {
-  const [ejercicios, setEjercicios] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-
+export function useEjercicios({
+  category = '',
+  muscles = '',
+  equipment = '',
+  offset = 0,
+} = {}) {
+  const [attempt, setAttempt] = useState(0),
+    [state, setState] = useState({
+      ejercicios: [],
+      loading: true,
+      error: null,
+      count: 0,
+    })
   useEffect(() => {
-    const cargarEjercicios = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        const data = await getEjercicios({
-          limit: 20,
-          ...filtros
-        })
-        setEjercicios(data.results || [])
-      } catch (err) {
-        console.error('Error al cargar ejercicios:', err)
-        setError(err.message)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    cargarEjercicios()
-  }, [filtros.categoria, filtros.musculo, filtros.equipamiento])
-
-  return { ejercicios, loading, error }
+    const controller = new AbortController()
+    setState({ ejercicios: [], loading: true, error: null, count: 0 })
+    getEjercicios(
+      { category, muscles, equipment, offset, limit: 20 },
+      controller.signal,
+    )
+      .then((data) => {
+        if (!controller.signal.aborted)
+          setState({
+            ejercicios: data.results || [],
+            count: data.count || 0,
+            loading: false,
+            error: null,
+          })
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted)
+          setState({
+            ejercicios: [],
+            count: 0,
+            loading: false,
+            error: error.message,
+          })
+      })
+    return () => controller.abort()
+  }, [category, muscles, equipment, offset, attempt])
+  return { ...state, reintentar: () => setAttempt((n) => n + 1) }
 }

@@ -1,35 +1,34 @@
-import React from 'react'
 import Scoreboard from '../components/Scoreboard'
 import ActivityLog from '../components/ActivityLog'
 import SideColumn from '../components/SideColumn'
-
-function Panel({ actividades, onEliminar, loading, error, rangoActivo }) {
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Cargando tus actividades...</p>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="error-container">
-        <p>⚠️ Error al cargar actividades: {error}</p>
-      </div>
-    )
-  }
-
+import { filtrarRango } from '../utils/actividad'
+export default function Panel({
+  actividades,
+  onEliminar,
+  onEditar,
+  loading,
+  error,
+  rangoActivo,
+  metas,
+  ahora,
+}) {
+  if (loading) return <p role="status">Cargando actividades…</p>
+  if (error) return <p role="alert">{error}</p>
   return (
     <>
-      <Scoreboard actividades={actividades} rangoActivo={rangoActivo} />
+      <Scoreboard
+        actividades={actividades}
+        rangoActivo={rangoActivo}
+        ahora={ahora}
+      />
       <div className="grid">
-        <ActivityLog actividades={actividades} onEliminar={onEliminar} />
-        <SideColumn actividades={actividades} rangoActivo={rangoActivo} />
+        <ActivityLog
+          actividades={filtrarRango(actividades, rangoActivo, ahora)}
+          onEliminar={onEliminar}
+          onEditar={onEditar}
+        />
+        <SideColumn actividades={actividades} metas={metas} ahora={ahora} />
       </div>
     </>
   )
 }
-
-export default Panel

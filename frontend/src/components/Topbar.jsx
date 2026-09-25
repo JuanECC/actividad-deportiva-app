@@ -1,7 +1,15 @@
 import React, { useCallback } from 'react'
 
-function Topbar({ onRegistrar, rangoActivo, onCambiarRango, nombreUsuario, sesionesHoy = [] }) {
-  const fecha = new Date()
+function Topbar({
+  onRegistrar,
+  rangoActivo,
+  onCambiarRango,
+  nombreUsuario,
+  sesionesHoy = [],
+  mostrarRango = true,
+  ahora = new Date(),
+}) {
+  const fecha = ahora
   const opciones = { weekday: 'long', day: 'numeric', month: 'long' }
   const fechaFormateada = fecha.toLocaleDateString('es-ES', opciones)
 
@@ -27,27 +35,35 @@ function Topbar({ onRegistrar, rangoActivo, onCambiarRango, nombreUsuario, sesio
       <div>
         <p className="topbar__eyebrow">{fechaFormateada}</p>
         <h1 className="topbar__title">
-          {saludo}, {nombreUsuario || 'Usuario'}. {hayActividadHoy ? '¡Sigue así!' : '¡A moverse!'}
+          {saludo}, {nombreUsuario || 'Usuario'}.{' '}
+          {hayActividadHoy ? '¡Sigue así!' : '¡A moverse!'}
         </h1>
         <p className="topbar__mensaje">{mensaje}</p>
       </div>
       <div className="topbar__actions">
-        <div className="segmented" role="tablist" aria-label="Rango de tiempo">
-          {rangos.map(rango => (
-            <button
-              key={rango}
-              className={`segmented__item ${rangoActivo === rango ? 'segmented__item--active' : ''}`}
-              role="tab"
-              aria-selected={rangoActivo === rango}
-              onClick={() => onCambiarRango && onCambiarRango(rango)}
-            >
-              {rango}
-            </button>
-          ))}
-        </div>
+        {mostrarRango && (
+          <div className="segmented" role="group" aria-label="Rango de tiempo">
+            {rangos.map((rango) => (
+              <button
+                key={rango}
+                className={`segmented__item ${rangoActivo === rango ? 'segmented__item--active' : ''}`}
+                type="button"
+                aria-pressed={rangoActivo === rango}
+                onClick={() => onCambiarRango && onCambiarRango(rango)}
+              >
+                {rango}
+              </button>
+            ))}
+          </div>
+        )}
         <button className="btn btn--primary" onClick={handleRegistrar}>
           <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
-            <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"/>
+            <path
+              d="M12 5v14M5 12h14"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+            />
           </svg>
           Registrar actividad
         </button>

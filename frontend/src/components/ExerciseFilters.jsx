@@ -1,35 +1,35 @@
-import React from 'react'
-
-function ExerciseFilters({ categorias, musculos, equipamiento, filtros, onChange }) {
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    onChange({ ...filtros, [name]: value })
-  }
-
+export default function ExerciseFilters({
+  categorias,
+  musculos,
+  equipamiento,
+  filtros,
+  onChange,
+}) {
   return (
     <div className="exercise-filters">
-      <select name="categoria" value={filtros.categoria || ''} onChange={handleChange}>
-        <option value="">Todas las categorías</option>
-        {categorias.map(cat => (
-          <option key={cat.id} value={cat.id}>{cat.name}</option>
-        ))}
-      </select>
-
-      <select name="musculo" value={filtros.musculo || ''} onChange={handleChange}>
-        <option value="">Todos los músculos</option>
-        {musculos.map(m => (
-          <option key={m.id} value={m.id}>{m.name}</option>
-        ))}
-      </select>
-
-      <select name="equipamiento" value={filtros.equipamiento || ''} onChange={handleChange}>
-        <option value="">Todo el equipamiento</option>
-        {equipamiento.map(eq => (
-          <option key={eq.id} value={eq.id}>{eq.name}</option>
-        ))}
-      </select>
+      {[
+        ['category', 'Categoría', categorias],
+        ['muscles', 'Músculo', musculos],
+        ['equipment', 'Equipamiento', equipamiento],
+      ].map(([key, label, list]) => (
+        <label key={key}>
+          {label}
+          <select
+            name={key}
+            value={filtros[key] || ''}
+            onChange={(e) =>
+              onChange({ ...filtros, [key]: e.target.value, offset: 0 })
+            }
+          >
+            <option value="">Todos</option>
+            {list.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      ))}
     </div>
   )
 }
-
-export default ExerciseFilters

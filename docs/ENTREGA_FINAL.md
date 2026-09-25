@@ -1,25 +1,5 @@
-# 🎓 Entrega Final — SPLIT
+# Estado de SPLIT
 
-## Estado del proyecto
+El repositorio contiene frontend React/Firebase y backend Express opcional. Para instalación y rutas de documentación, consulta el README principal.
 
-Aplicación funcional y desplegada públicamente.
-
-## Funcionalidades implementadas
-
-- Autenticación con Firebase
-- Registro de actividades deportivas
-- Planes de entrenamiento con calendario
-- Registro de sueño
-- Estadísticas dinámicas
-- Protección de rutas
-- Validaciones con Zod
-- Manejo de errores
-- Despliegue CI/CD con Vercel
-
-## Repositorio
-
-https://github.com/JuanECC/actividad-deportiva-app
-
-## App en producción
-
-https://actividad-deportiva-app.vercel.app
+Las reparaciones locales de septiembre de 2026 se describen en REPARACIONES.md, junto con las comprobaciones realizadas y los límites de compatibilidad de datos antiguos. Los cambios no se publicaron automáticamente; producción requiere el flujo de despliegue de VERCEL.md.

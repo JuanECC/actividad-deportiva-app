@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/useAuth'
 import { loginSchema, validarConZod } from '../utils/validations'
 
 function Login() {
@@ -32,10 +32,21 @@ function Login() {
 
     try {
       setLoading(true)
-      if (isRegister) await register(email, password)
-      else await login(email, password)
+      if (isRegister) await register(email.trim(), password)
+      else await login(email.trim(), password)
     } catch (err) {
       switch (err.code) {
+        case 'auth/invalid-credential':
+          setError('Correo o contraseña incorrectos')
+          break
+        case 'auth/network-request-failed':
+          setError('No se pudo conectar. Revisa tu conexión.')
+          break
+        case 'auth/too-many-requests':
+          setError(
+            'Demasiados intentos. Espera un momento antes de reintentar.',
+          )
+          break
         case 'auth/user-not-found':
           setError('No existe una cuenta con este email')
           break
@@ -86,6 +97,7 @@ function Login() {
               placeholder="tu@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
               required
             />
           </div>
@@ -98,6 +110,7 @@ function Login() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
               required
             />
           </div>
@@ -111,6 +124,7 @@ function Login() {
                 placeholder="••••••••"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={loading}
                 required
               />
             </div>
@@ -122,16 +136,23 @@ function Login() {
             </div>
           )}
 
-          <button type="submit" className="btn btn--primary login-submit" disabled={loading}>
+          <button
+            type="submit"
+            className="btn btn--primary login-submit"
+            disabled={loading}
+          >
             {loading
               ? 'Procesando...'
-              : isRegister ? 'Crear cuenta' : 'Iniciar sesión'}
+              : isRegister
+                ? 'Crear cuenta'
+                : 'Iniciar sesión'}
           </button>
         </form>
 
         <div className="login-footer">
           <button
             className="login-toggle"
+            disabled={loading}
             onClick={() => {
               setIsRegister(!isRegister)
               setError('')

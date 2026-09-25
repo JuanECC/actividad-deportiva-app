@@ -1,131 +1,116 @@
-import React, { useCallback } from 'react'
-
-function ActivityLog({ actividades, onEliminar, mostrarTipo = false }) {
-  const iconMap = {
-    run: (
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" fill="currentColor"/>
-      </svg>
-    ),
-    bike: (
-      <svg viewBox="0 0 24 24" fill="none">
-        <circle cx="6" cy="17" r="3.2" stroke="currentColor" strokeWidth="2"/>
-        <circle cx="18" cy="17" r="3.2" stroke="currentColor" strokeWidth="2"/>
-        <path d="M6 17 10 8h4l3 5M10 8l2 4h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    ),
-    swim: (
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M2 16c1.5 1.4 3 1.4 4.5 0s3-1.4 4.5 0 3 1.4 4.5 0 3-1.4 4.5 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        <circle cx="17" cy="6" r="1.6" fill="currentColor"/>
-        <path d="M9 12l4-3 2 2-3 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    ),
-    strength: (
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M3 12h2M19 12h2M6 8v8M18 8v8M8 12h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      </svg>
-    ),
-    sport: (
-      <svg viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
-        <path d="M12 7v10M7 12h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      </svg>
-    )
-  }
-
-  const formatearDistancia = (act) => {
-    if (act.tipo === 'strength') {
-      if (act.modoFuerza === 'tiempo') {
-        return `${act.distancia} min`
-      }
-      return `${act.distancia} rondas`
+import { useState, useRef } from 'react'
+import { Link } from 'react-router-dom'
+import { duracionTexto, minutosActividad, fechaLocal } from '../utils/actividad'
+import { mensajeError } from '../utils/errores'
+import { useConfirmacion } from '../context/useConfirmacion'
+export default function ActivityLog({ actividades, onEliminar, onEditar }) {
+  const confirmar = useConfirmacion()
+  const [error, setError] = useState(''),
+    [pending, setPending] = useState(null),
+    [limit, setLimit] = useState(10),
+    busy = useRef(false)
+  const remove = async (a) => {
+    if (busy.current || !(await confirmar('¿Eliminar "' + a.nombre + '"? Esta acción no se puede deshacer.'))) return
+    busy.current = true
+    setPending(a.id)
+    setError('')
+    try {
+      await onEliminar(a.id)
+    } catch (e) {
+      setError(mensajeError(e, 'No se pudo eliminar.'))
+    } finally {
+      busy.current = false
+      setPending(null)
     }
-    if (act.tipo === 'sport') return act.distancia
-    return act.distancia
   }
-
-  const formatearDuracion = (duracion) => {
-    if (!duracion) return '--:--'
-    const partes = duracion.split(':')
-    if (partes.length === 2) {
-      const [min, seg] = partes
-      if (parseInt(min) >= 60) {
-        const h = Math.floor(parseInt(min) / 60)
-        const m = parseInt(min) % 60
-        return `${h}h ${m.toString().padStart(2, '0')}min`
-      }
-      return `${min}:${seg}`
-    }
-    return duracion
-  }
-
-  const handleEliminar = useCallback((id, nombre) => {
-    if (window.confirm(`¿Eliminar "${nombre}"?`)) {
-      onEliminar(id)
-    }
-  }, [onEliminar])
-
-  if (actividades.length === 0) {
-    return (
-      <section className="panel panel--log" aria-label="Actividades recientes">
-        <div className="panel__header">
-          <h2 className="panel__title">Actividades recientes</h2>
-        </div>
-        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-          <p>No hay actividades registradas</p>
-          <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>
-            ¡Registra tu primera actividad!
-          </p>
-        </div>
-      </section>
-    )
-  }
-
+  const metric = (a) =>
+    a.tipo === 'strength'
+      ? a.distancia + (a.modoFuerza === 'tiempo' ? ' min/ronda' : ' rondas')
+      : a.tipo === 'sport'
+        ? a.distancia
+        : a.distancia + (a.tipo === 'swim' ? ' m' : ' km')
   return (
-    <section className="panel panel--log" aria-label="Actividades recientes">
+    <section className="panel panel--log" aria-label="Historial de actividades">
       <div className="panel__header">
-        <h2 className="panel__title">Actividades recientes</h2>
-        <a className="panel__link" href="#">Ver todas</a>
+        <h2 className="panel__title">Actividades</h2>
+        <Link className="panel__link" to="/actividades">
+          Ver actividades y planes
+        </Link>
       </div>
-
-      <ul className="log">
-        {actividades.map((act) => (
-          <li key={act.id} className="log__row">
-            <span className={`log__icon log__icon--${act.tipo}`} aria-hidden="true">
-              {iconMap[act.tipo] || iconMap.sport}
-            </span>
-            <div className="log__info">
-              <span className="log__name">{act.nombre}</span>
-              <span className="log__meta">
-                {mostrarTipo && (
-                  <span className={`log__tipo-badge ${act.esPlan ? 'log__tipo-badge--plan' : 'log__tipo-badge--sesion'}`}>
-                    {act.esPlan ? '📋 Plan' : '✅ Sesión'}
+      {error && (
+        <p role="alert" className="login-error">
+          {error}
+        </p>
+      )}
+      {!actividades.length ? (
+        <p>No hay sesiones en este periodo.</p>
+      ) : (
+        <ul className="log">
+          {actividades.slice(0, limit).map((a) => (
+            <li className="log__row" key={a.id}>
+              <span className="log__icon" aria-hidden="true">
+                {{
+                  run: '🏃',
+                  bike: '🚴',
+                  swim: '🏊',
+                  strength: '🏋️',
+                  sport: '🏅',
+                }[a.tipo] || '🏅'}
+              </span>
+              <div className="log__info">
+                <span className="log__name" title={a.nombre}>
+                  {a.nombre}
+                </span>
+                <span className="log__meta">
+                  {fechaLocal(a.fecha)}
+                  {a.planId ? ' · Sesión de plan' : ''}
+                </span>
+              </div>
+              <div className="log__metrics">
+                <span>{metric(a)}</span>
+                <span>{duracionTexto(minutosActividad(a))}</span>
+                {a.ritmo && (
+                  <span>
+                    {a.ritmo}
+                    {a.tipo === 'run'
+                      ? ' min/km'
+                      : a.tipo === 'swim'
+                        ? ' min/100m'
+                        : a.tipo === 'bike'
+                          ? ' km/h'
+                          : ''}
                   </span>
                 )}
-                {act.meta}
-              </span>
-            </div>
-            <span className="log__stat">{formatearDistancia(act)}</span>
-            <span className="log__stat log__stat--mono">{formatearDuracion(act.duracion)}</span>
-            <span className="log__stat log__stat--mono">{act.ritmo}</span>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <span className={`tag ${act.tagType === 'pr' ? 'tag--pr' : ''}`}>
-                {act.tag}
-              </span>
-              <button
-                className="log__delete"
-                onClick={() => handleEliminar(act.id, act.nombre)}
-                aria-label="Eliminar actividad"
-              >
-                ✕
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+              </div>
+              <div className="log__actions">
+                <span className="tag">{a.tag}</span>
+                {onEditar && (
+                  <button
+                    disabled={pending !== null}
+                    onClick={() => onEditar(a)}
+                    aria-label={'Editar ' + a.nombre}
+                  >
+                    Editar
+                  </button>
+                )}
+                <button
+                  className="log__delete"
+                  disabled={pending !== null}
+                  onClick={() => remove(a)}
+                  aria-label={'Eliminar ' + a.nombre}
+                >
+                  {pending === a.id ? '…' : '✕'}
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      {actividades.length > limit && (
+        <button className="btn" onClick={() => setLimit((n) => n + 10)}>
+          Mostrar más ({actividades.length - limit})
+        </button>
+      )}
     </section>
   )
 }
-
-export default ActivityLog

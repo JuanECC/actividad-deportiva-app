@@ -1,57 +1,58 @@
-import React, { useState } from 'react'
-import { useAuth } from '../context/AuthContext'
-
-function Ajustes({ nombre, onGuardarNombre }) {
-  const { currentUser } = useAuth()
-  const [nombreInput, setNombreInput] = useState(nombre || '')
-  const [mensaje, setMensaje] = useState('')
-
-  const handleGuardar = async (e) => {
+import { useState } from 'react'
+import { useAuth } from '../context/useAuth'
+import { mensajeError } from '../utils/errores'
+function FormNombre({ nombre, onGuardarNombre }) {
+  const [draft, setDraft] = useState(nombre),
+    [busy, setBusy] = useState(false),
+    [message, setMessage] = useState(''),
+    [error, setError] = useState('')
+  const submit = async (e) => {
     e.preventDefault()
-    if (!nombreInput.trim()) {
-      setMensaje('El nombre no puede estar vacío')
-      return
+    if (busy) return
+    setBusy(true)
+    setError('')
+    setMessage('')
+    try {
+      await onGuardarNombre(draft)
+      setMessage('Nombre actualizado.')
+    } catch (err) {
+      setError(mensajeError(err))
+    } finally {
+      setBusy(false)
     }
-    await onGuardarNombre(nombreInput)
-    setMensaje('Nombre actualizado ✅')
   }
-
   return (
-    <section className="panel" aria-label="Ajustes">
-      <div className="panel__header">
-        <h2 className="panel__title">⚙️ Ajustes</h2>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div>
-          <h3 style={{ fontSize: '14px', fontWeight: '700', marginBottom: '8px' }}>
-            Información de la cuenta
-          </h3>
-          <p style={{ color: 'var(--text-muted)' }}>
-            Email: <span style={{ color: 'var(--text)' }}>{currentUser?.email}</span>
-          </p>
-          <p style={{ color: 'var(--text-muted)' }}>
-            UID: <span style={{ color: 'var(--text)' }}>{currentUser?.uid}</span>
-          </p>
-        </div>
-
-        <form onSubmit={handleGuardar} className="modal-field">
-          <label htmlFor="nombre">Tu nombre</label>
-          <input
-            id="nombre"
-            type="text"
-            value={nombreInput}
-            onChange={(e) => setNombreInput(e.target.value)}
-            placeholder="Escribe tu nombre"
-          />
-          <button type="submit" className="btn btn--primary" style={{ marginTop: '8px' }}>
-            Guardar nombre
-          </button>
-          {mensaje && <p style={{ color: 'var(--accent)', fontSize: '13px' }}>{mensaje}</p>}
-        </form>
-      </div>
+    <form className="modal-field" onSubmit={submit}>
+      <label htmlFor="perfil-nombre">Tu nombre</label>
+      <input
+        id="perfil-nombre"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        required
+        maxLength={80}
+        disabled={busy}
+      />
+      <button className="btn btn--primary" disabled={busy}>
+        {busy ? 'Guardando…' : 'Guardar nombre'}
+      </button>
+      {message && <p role="status">{message}</p>}
+      {error && (
+        <p role="alert" className="login-error">
+          {error}
+        </p>
+      )}
+    </form>
+  )
+}
+export default function Ajustes({ nombre, onGuardarNombre, loading, error }) {
+  const { currentUser } = useAuth()
+  if (loading) return <p role="status">Cargando perfil…</p>
+  if (error) return <p role="alert">{error}</p>
+  return (
+    <section className="panel">
+      <h2>Ajustes</h2>
+      <p>{currentUser?.email}</p>
+      <FormNombre nombre={nombre} onGuardarNombre={onGuardarNombre} />
     </section>
   )
 }
-
-export default Ajustes

@@ -1,44 +1,33 @@
-# 🏃 SPLIT — Registro de entrenamientos
+# SPLIT — Registro de entrenamientos
 
-Monorepo con frontend **React + Vite** y backend **Express opcional**.
+Aplicación React + Vite con Firebase Auth y Firestore. El backend Express es opcional y solo expone un health check.
 
-## 📁 Estructura
+## Desarrollo
 
-```text
-actividad-deportiva-app/
-├── frontend/              → React + Vite + Firebase
-├── backend/               → Express (health check)
-└── README.md
-```
+Usa Node 22.12 o posterior (también se admite Node 20.19).
 
-## 🚀 Instalación
+Desde frontend:
 
-### Frontend
+    npm ci
+    # Copia .env.example a .env y configura Firebase.
+    npm run dev
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+Verificación:
 
-### Backend (opcional)
+    npm run lint
+    npm test
+    npm run build
 
-```bash
-cd backend
-npm install
-npm run dev
-```
+## Documentación
 
-## 🌐 Producción
+- [Frontend](frontend/README.md)
+- [Backend opcional](backend/README.md)
+- [Arquitectura y modelo de datos](frontend/docs/ARQUITECTURA.md)
+- [API de ejercicios](frontend/docs/API.md)
+- [Validaciones y errores](frontend/docs/ERRORES.md)
+- [Seguridad](frontend/docs/SEGURIDAD.md)
+- [Rendimiento](frontend/docs/OPTIMIZACION.md)
+- [Despliegue](docs/VERCEL.md)
+- [Reparaciones y compatibilidad de datos antiguos](docs/REPARACIONES.md)
 
-Aplicación desplegada en Vercel:
-
-**https://actividad-deportiva-app.vercel.app**
-
-## 📚 Documentación
-
-* [`frontend/docs/API.md`](frontend/docs/API.md)
-* [`frontend/docs/ARQUITECTURA.md`](frontend/docs/ARQUITECTURA.md)
-* [`frontend/docs/ERRORES.md`](frontend/docs/ERRORES.md)
-* [`frontend/docs/OPTIMIZACION.md`](frontend/docs/OPTIMIZACION.md)
-* [`frontend/docs/SEGURIDAD.md`](frontend/docs/SEGURIDAD.md)
+El desarrollo y las pruebas locales no publican la aplicación ni crean commits.

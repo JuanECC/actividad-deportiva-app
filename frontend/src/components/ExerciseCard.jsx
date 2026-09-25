@@ -1,61 +1,60 @@
-import React from 'react'
-
-function ExerciseCard({ ejercicio, mapaMusculos, onSelect }) {
-  const musculosPrincipales = (ejercicio.muscles || [])
-    .map(id => mapaMusculos[id])
-    .filter(Boolean)
-
-  const musculosSecundarios = (ejercicio.muscles_secondary || [])
-    .map(id => mapaMusculos[id])
-    .filter(Boolean)
-
-  // Elegir el primer músculo con grupo conocido
-  const grupoPrincipal =
-    musculosPrincipales.find(m => m.grupo !== 'Otro') || musculosPrincipales[0]
-
-  const nombreMostrar =
-    grupoPrincipal?.nombreEn ||
-    grupoPrincipal?.nombre ||
-    `Ejercicio #${ejercicio.id}`
-
+import { traduccionEjercicio } from '../services/wgerApi'
+export default function ExerciseCard({ ejercicio, idiomas, onSelect }) {
+  const translation = traduccionEjercicio(ejercicio, idiomas)
+  // Convert API markup to plain text; never inject third-party HTML.
+  const parser = new DOMParser(),
+    description =
+      parser.parseFromString(translation.description || '', 'text/html').body
+        .textContent || ''
   return (
-    <div className="exercise-card">
-      <div className="exercise-card__header">
-        <div className="exercise-card__title">
-          <span className="exercise-card__emoji">
-            {grupoPrincipal?.icono || '🏋️'}
-          </span>
-          <span className="exercise-card__name">{nombreMostrar}</span>
-        </div>
-        <span className="exercise-card__category">{ejercicio.category}</span>
-      </div>
-
-      <div className="exercise-card__body">
-        <div className="exercise-card__group">
-          <strong>Grupo:</strong> {grupoPrincipal?.grupo || 'Sin clasificar'}
-        </div>
-        <p className="exercise-card__detail">
-          <strong>Músculos:</strong>{' '}
-          {musculosPrincipales.length > 0
-            ? musculosPrincipales.map(m => m.nombreEn || m.nombre).join(', ')
-            : 'No especificados'}
-        </p>
-        {musculosSecundarios.length > 0 && (
-          <p className="exercise-card__detail">
-            <strong>Secundarios:</strong>{' '}
-            {musculosSecundarios.map(m => m.nombreEn || m.nombre).join(', ')}
-          </p>
+    <article className="exercise-card">
+      <h3>{translation.name}</h3>
+      <p>{ejercicio.category?.name || 'Ejercicio'}</p>
+      <p className="exercise-card__detail">
+        {(ejercicio.muscles || []).map((m) => m.name_en || m.name).join(', ') ||
+          'Sin músculos especificados'}
+      </p>
+      {description && (
+        <details>
+          <summary>Ver instrucciones</summary>
+          <p>{description}</p>
+        </details>
+      )}
+      <p className="help-text">
+        Fuente:{' '}
+        <a
+          href={'https://wger.de/en/exercise/' + ejercicio.id + '/view/'}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Wger
+        </a>
+        {translation.license_author ? ' · ' + translation.license_author : ''}
+        {ejercicio.license?.url?.startsWith('https://creativecommons.org/') && (
+          <>
+            {' '}
+            ·{' '}
+            <a href={ejercicio.license.url} target="_blank" rel="noreferrer">
+              {ejercicio.license.short_name}
+            </a>
+          </>
         )}
-      </div>
-
+      </p>
       <button
         className="exercise-card__btn"
-        onClick={() => onSelect && onSelect(ejercicio)}
+        onClick={() =>
+          onSelect({
+            deporte: 'Gimnasio',
+            tipo: 'strength',
+            nombre: translation.name,
+            distancia: '',
+            duracion: '',
+            ritmo: '',
+          })
+        }
       >
-        + Registrar
+        Registrar
       </button>
-    </div>
+    </article>
   )
 }
-
-export default ExerciseCard

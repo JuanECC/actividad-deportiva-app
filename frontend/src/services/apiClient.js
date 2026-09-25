@@ -1,59 +1,51 @@
-const API_BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
+const API_BACKEND_URL =
+  import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
 const API_WGER_URL = import.meta.env.VITE_API_URL || 'https://wger.de/api/v2'
-
-export async function apiClient(endpoint, options = {}, baseUrl = API_WGER_URL) {
-  const url = `${baseUrl}${endpoint}`
-
-  const defaultHeaders = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  }
-
-  const config = {
-    ...options,
-    headers: {
-      ...defaultHeaders,
-      ...options.headers,
-    },
-  }
-
+export async function apiClient(
+  endpoint,
+  options = {},
+  baseUrl = API_WGER_URL,
+) {
+  const controller = new AbortController()
+  const abort = () => controller.abort()
+  if (options.signal?.aborted) controller.abort()
+  options.signal?.addEventListener('abort', abort, { once: true })
+  const timer = setTimeout(() => controller.abort(), 15000)
   try {
-    const response = await fetch(url, config)
-
-    if (!response.ok) {
-      let mensaje = `Error ${response.status}: ${response.statusText}`
-      try {
-        const data = await response.json()
-        mensaje = data.message || data.error || mensaje
-      } catch {
-        // no JSON
-      }
-      const error = new Error(mensaje)
-      error.status = response.status
-      throw error
+    const response = await fetch(baseUrl.replace(/\/$/, '') + endpoint, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        Accept: 'application/json',
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...options.headers,
+      },
+    })
+    if (!response.ok)
+      throw new Error(
+        response.status === 429
+          ? 'Demasiadas consultas. Espera un momento e intenta de nuevo.'
+          : 'El servicio no pudo responder. Intenta de nuevo.',
+      )
+    try {
+      return await response.json()
+    } catch {
+      throw new Error('El servicio devolvió una respuesta inválida.')
     }
-
-    return await response.json()
   } catch (error) {
-    if (error.name === 'TypeError' || error.message === 'Failed to fetch') {
-      error.message = 'No se pudo conectar con el servidor. Revisa tu conexión.'
-    }
-    console.error(`[apiClient] Error en ${endpoint}:`, error.message)
+    if (options.signal?.aborted) throw error
+    if (error.name === 'AbortError')
+      throw new Error('El servicio tardó demasiado. Intenta de nuevo.')
+    if (error instanceof TypeError)
+      throw new Error('No se pudo conectar. Revisa tu conexión.')
     throw error
+  } finally {
+    clearTimeout(timer)
+    options.signal?.removeEventListener('abort', abort)
   }
 }
-
-export function get(endpoint, baseUrl) {
-  return apiClient(endpoint, { method: 'GET' }, baseUrl)
-}
-
-export function post(endpoint, body, baseUrl) {
-  return apiClient(endpoint, {
-    method: 'POST',
-    body: JSON.stringify(body),
-  }, baseUrl)
-}
-
-export async function getBackendHealth() {
-  return get('/api/health', API_BACKEND_URL)
-}
+export const get = (endpoint, baseUrl, options = {}) =>
+  apiClient(endpoint, { ...options, method: 'GET' }, baseUrl)
+export const post = (endpoint, body, baseUrl) =>
+  apiClient(endpoint, { method: 'POST', body: JSON.stringify(body) }, baseUrl)
+export const getBackendHealth = () => get('/api/health', API_BACKEND_URL)
