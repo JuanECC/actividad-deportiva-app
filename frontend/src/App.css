@@ -103,6 +103,28 @@ svg { display: block; }
 .sticky-chat__form small { display: block; font-size: 10px; line-height: 1.4; margin-top: 8px; }
 @media (max-width: 620px) { .sticky-chat { right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); } }
 @media (prefers-reduced-motion: no-preference) { .sticky-chat__panel { animation: confirmacion-entrada 180ms ease-out; } }
+.actividad-guardada-region {
+  position: fixed; top: max(20px, env(safe-area-inset-top)); left: 50%;
+  transform: translateX(-50%); width: min(400px, calc(100vw - 32px));
+  z-index: 1200; pointer-events: none;
+}
+.actividad-guardada {
+  display: flex; align-items: center; gap: 12px; padding: 16px;
+  border: 1px solid var(--accent-dim); border-radius: 16px;
+  background: var(--surface); color: var(--text); box-shadow: 0 12px 40px #0006;
+  pointer-events: auto;
+}
+.actividad-guardada strong { display: block; color: var(--accent); font-size: 15px; }
+.actividad-guardada span { display: block; margin-top: 4px; font-size: 12px; line-height: 1.5; }
+.actividad-guardada__icono { width: 40px; height: 40px; flex-shrink: 0; }
+.actividad-guardada__icono circle { fill: #cbff4d20; stroke: var(--accent); stroke-width: 1.5; }
+.actividad-guardada__icono path { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 30; }
+.actividad-guardada button { margin-left: auto; min-width: 36px; min-height: 36px; border: 0; border-radius: 8px; background: transparent; color: var(--text); cursor: pointer; font-size: 22px; }
+@keyframes actividad-check { from { stroke-dashoffset: 30; } to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: no-preference) {
+  .actividad-guardada { animation: confirmacion-entrada 220ms ease-out; }
+  .actividad-guardada__icono path { animation: actividad-check 350ms 100ms ease-out both; }
+}
 .menu-toggle { display: none; }
 .confirmacion {
   width: min(440px, calc(100% - 32px));

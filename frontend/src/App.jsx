@@ -9,6 +9,7 @@ import {
 import Sidebar from './components/Sidebar'
 import PwaUpdate from './components/PwaUpdate'
 import ChatDeportivo from './components/ChatDeportivo'
+import ActividadGuardada from './components/ActividadGuardada'
 import ConfirmacionProvider from './components/ConfirmacionProvider'
 import Topbar from './components/Topbar'
 import ModalRegistro from './components/ModalRegistro'
@@ -50,6 +51,12 @@ function Workspace() {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
   }, [location.pathname])
   const cerrar = useCallback(() => setModal(null), [])
+  const [avisoGuardado, setAvisoGuardado] = useState(0)
+  const cerrarAviso = useCallback(() => setAvisoGuardado(0), [])
+  const guardarActividad = useCallback(async (data) => {
+    await agregarActividad(data)
+    if (!data.id) setAvisoGuardado(Date.now())
+  }, [agregarActividad])
   const abrir = useCallback((data) => setModal({ data: data || null }), [])
   const sesionesHoy = sesiones.filter(
     (a) => fechaLocal(a.fecha) === fechaLocal(ahora),
@@ -136,10 +143,11 @@ function Workspace() {
       <ModalRegistro
         isOpen={modal !== null}
         onClose={cerrar}
-        onRegistrar={agregarActividad}
+        onRegistrar={guardarActividad}
         initialData={modal?.data}
       />
       <ChatDeportivo />
+      <ActividadGuardada aviso={avisoGuardado} onCerrar={cerrarAviso} />
     </div>
   )
 }
