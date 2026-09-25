@@ -1,0 +1,45 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owner(uid) { return request.auth != null && request.auth.uid == uid; }
+    match /users/{uid}/actividades/{id} {
+      allow read, delete: if owner(uid);
+      allow create, update: if owner(uid)
+        && request.resource.data.keys().hasAll(['nombre', 'tipo', 'fecha', 'esPlan', 'duracionMinutos', 'distancia', 'diasSeleccionados', 'semanas'])
+        && request.resource.data.nombre is string
+        && request.resource.data.nombre.size() >= 3 && request.resource.data.nombre.size() <= 120
+        && request.resource.data.tipo in ['run', 'bike', 'swim', 'strength', 'sport']
+        && request.resource.data.fecha is string
+        && request.resource.data.fecha.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.esPlan is bool
+        && request.resource.data.duracionMinutos is number
+        && request.resource.data.duracionMinutos > 0 && request.resource.data.duracionMinutos <= 1440
+        && request.resource.data.distancia is string && request.resource.data.distancia.size() <= 120
+        && request.resource.data.diasSeleccionados is list && request.resource.data.diasSeleccionados.size() <= 7
+        && request.resource.data.semanas is int && request.resource.data.semanas >= 1 && request.resource.data.semanas <= 12;
+    }
+    match /users/{uid}/sueno/{id} {
+      allow read, delete: if owner(uid);
+      allow create: if owner(uid) && id == request.resource.data.fecha
+        && request.resource.data.keys().hasOnly(['fecha', 'horaDormir', 'horaDespertar', 'duracionMinutos', 'esSueno'])
+        && request.resource.data.fecha.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.horaDormir.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$')
+        && request.resource.data.horaDespertar.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$')
+        && request.resource.data.duracionMinutos is number
+        && request.resource.data.duracionMinutos > 0 && request.resource.data.duracionMinutos < 1440;
+    }
+    match /users/{uid}/perfil/info {
+      allow read: if owner(uid);
+      allow create, update: if owner(uid)
+        && request.resource.data.keys().hasOnly(['nombre', 'metas'])
+        && (!('nombre' in request.resource.data) || (
+          request.resource.data.nombre is string
+          && request.resource.data.nombre.size() > 0 && request.resource.data.nombre.size() <= 80))
+        && (!('metas' in request.resource.data) || (
+          request.resource.data.metas.keys().hasOnly(['distancia', 'fuerza', 'suenio'])
+          && request.resource.data.metas.distancia is number && request.resource.data.metas.distancia > 0 && request.resource.data.metas.distancia <= 100000
+          && request.resource.data.metas.fuerza is int && request.resource.data.metas.fuerza > 0 && request.resource.data.metas.fuerza <= 100000
+          && request.resource.data.metas.suenio is number && request.resource.data.metas.suenio > 0 && request.resource.data.metas.suenio <= 100000));
+    }
+  }
+}

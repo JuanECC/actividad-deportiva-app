@@ -1,28 +1,13 @@
-# ⚠️ Manejo de Errores y Validaciones
+# Validaciones y errores
 
-## Validaciones
+Zod valida sesiones y sueño antes de escribir. Nombres se recortan, números negativos y duraciones inválidas se rechazan, y deporte/tipo deben coincidir. Las sesiones realizadas no aceptan fechas futuras. Duración admite minutos, mm:ss, hh:mm:ss y horas/minutos explícitos; se almacena en minutos.
 
-- Se utiliza **Zod** para validar formularios:
-  - Login
-  - Registro de actividades
-  - Registro de sueño
+Las mutaciones propagan el error al formulario. Solo se cierra el modal o anuncia éxito después de resolver la escritura. Un error de escritura no reemplaza permanentemente el historial por una pantalla de error.
 
-## Frontend
+Los botones se bloquean durante el guardado; el modal no se puede cerrar mientras hay una escritura pendiente. Escape y Tab se gestionan dentro del diálogo y se restaura el foco al cerrarlo.
 
-- Se creó un **ErrorBoundary** para capturar errores inesperados.
-- Los mensajes de validación de Zod se muestran bajo cada campo.
-- Los errores de Firebase Auth se traducen a mensajes amigables.
+El cliente HTTP usa un límite de 15 segundos, cancelación, respuestas JSON verificadas y mensajes para conexión, timeout, HTTP y saturación. Las pantallas permiten reintentar el catálogo.
 
-## Manejo de errores de API
+Los errores de suscripción muestran un mensaje específico y se limpian con la siguiente respuesta exitosa. Si la suscripción termina por permisos, la interfaz indica recargar para reintentar.
 
-- `apiClient.js` detecta:
-  - Errores de conexión (sin internet / servidor caído)
-  - Respuestas HTTP no exitosas (4xx, 5xx)
-  - Respuestas no JSON
-
-- Los mensajes se muestran al usuario sin exponer detalles técnicos.
-
-## Backend
-
-- Firestore Security Rules evitan accesos no autorizados.
-- Firebase Auth valida credenciales y sesión.
+ErrorBoundary cubre fallos de renderizado con un mensaje genérico; los errores asíncronos se capturan en sus propios formularios. Los detalles técnicos quedan en la consola, no en el mensaje visible.

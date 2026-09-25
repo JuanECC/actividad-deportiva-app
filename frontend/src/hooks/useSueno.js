@@ -1,97 +1,76 @@
 import { useState, useEffect } from 'react'
 import {
   collection,
-  addDoc,
-  deleteDoc,
   doc,
   onSnapshot,
   query,
-  orderBy
+  orderBy,
+  runTransaction,
+  deleteDoc,
 } from 'firebase/firestore'
 import { db } from '../services/firebase'
-import { useAuth } from '../context/AuthContext'
-
-function calcularDuracion(horaDormir, horaDespertar) {
-  const [h1, m1] = horaDormir.split(':').map(Number)
-  const [h2, m2] = horaDespertar.split(':').map(Number)
-  let minutos = h2 * 60 + m2 - (h1 * 60 + m1)
-  if (minutos < 0) minutos += 24 * 60
-  return minutos
-}
-
-function calcularCalidad(minutos) {
-  if (minutos >= 480) return 'Excelente'
-  if (minutos >= 360) return 'Buena'
-  if (minutos >= 240) return 'Regular'
-  return 'Pobre'
-}
-
+import { useAuth } from '../context/useAuth'
+import { suenoSchema } from '../utils/validations'
 export function useSueno() {
-  const { currentUser } = useAuth()
-  const [registros, setRegistros] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-
+  const { currentUser } = useAuth(),
+    uid = currentUser?.uid
+  const [state, setState] = useState({
+    uid: null,
+    items: [],
+    loading: true,
+    error: null,
+  })
   useEffect(() => {
-    if (!currentUser) {
-      setRegistros([])
-      setLoading(false)
+    if (!uid) {
+      setState({ uid: null, items: [], loading: false, error: null })
       return
     }
-
-    setLoading(true)
-    const ref = collection(db, 'users', currentUser.uid, 'sueno')
-    const q = query(ref, orderBy('fecha', 'desc'))
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-      setRegistros(data)
-      setLoading(false)
-    }, (err) => {
-      console.error('Error al cargar sueño:', err)
-      setError(err.message)
-      setLoading(false)
+    setState({ uid, items: [], loading: true, error: null })
+    return onSnapshot(
+      query(collection(db, 'users', uid, 'sueno'), orderBy('fecha', 'desc')),
+      (s) =>
+        setState({
+          uid,
+          items: s.docs.map((d) => ({ ...d.data(), id: d.id })),
+          loading: false,
+          error: null,
+        }),
+      () =>
+        setState((s) => ({
+          ...s,
+          loading: false,
+          error: 'No se pudo cargar el sueño. Recarga para reintentar.',
+        })),
+    )
+  }, [uid])
+  const registros = state.uid === uid ? state.items : []
+  const agregarSueno = async (entrada) => {
+    if (!uid) throw new Error('Inicia sesión para guardar.')
+    const data = suenoSchema.parse(entrada)
+    if (registros.some((r) => r.fecha === data.fecha))
+      throw new Error(
+        'Ya existe un registro en esa fecha. Elimínalo antes de reemplazarlo.',
+      )
+    const [h1, m1] = data.horaDormir.split(':').map(Number),
+      [h2, m2] = data.horaDespertar.split(':').map(Number)
+    const duracionMinutos = (h2 * 60 + m2 - h1 * 60 - m1 + 1440) % 1440
+    const target = doc(db, 'users', uid, 'sueno', data.fecha)
+    await runTransaction(db, async (tx) => {
+      const existing = await tx.get(target)
+      if (existing.exists())
+        throw new Error('Ya existe un registro en esa fecha.')
+      tx.set(target, { ...data, duracionMinutos, esSueno: true })
     })
-
-    return () => unsubscribe()
-  }, [currentUser])
-
-  const agregarSueno = async ({ fecha, horaDormir, horaDespertar }) => {
-    if (!currentUser) return
-    try {
-      const ref = collection(db, 'users', currentUser.uid, 'sueno')
-      const duracionMinutos = calcularDuracion(horaDormir, horaDespertar)
-      const calidad = calcularCalidad(duracionMinutos)
-
-      await addDoc(ref, {
-        fecha,
-        horaDormir,
-        horaDespertar,
-        duracionMinutos,
-        calidad,
-        esSueno: true
-      })
-    } catch (err) {
-      console.error('Error al agregar sueño:', err)
-      setError(err.message)
-    }
   }
-
   const eliminarSueno = async (id) => {
-    if (!currentUser) return
-    try {
-      await deleteDoc(doc(db, 'users', currentUser.uid, 'sueno', id))
-    } catch (err) {
-      console.error('Error al eliminar sueño:', err)
-      setError(err.message)
-    }
+    if (!uid) throw new Error('Inicia sesión para eliminar.')
+    await deleteDoc(doc(db, 'users', uid, 'sueno', id))
   }
-
   return {
     registros,
-    loading,
-    error,
+    loading: !!uid && (state.uid !== uid || state.loading),
+    error: state.uid === uid ? state.error : null,
     agregarSueno,
-    eliminarSueno
+    eliminarSueno,
   }
 }

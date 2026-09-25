@@ -19,8 +19,13 @@ class ErrorBoundary extends React.Component {
       return (
         <div className="error-container">
           <h2>😵 Algo salió mal</h2>
-          <p>{this.state.error?.message || 'Error inesperado'}</p>
-          <button className="btn btn--primary" onClick={() => window.location.reload()}>
+          <p>
+            No pudimos mostrar esta pantalla. Recarga para intentarlo de nuevo.
+          </p>
+          <button
+            className="btn btn--primary"
+            onClick={() => window.location.reload()}
+          >
             Recargar aplicación
           </button>
         </div>

@@ -1,4 +1,5 @@
 export const deportes = [
+  { id: 'gimnasio', nombre: 'Gimnasio', icono: '🏋️', tipo: 'strength' },
   { id: 'running', nombre: 'Correr', icono: '🏃', tipo: 'run' },
   { id: 'senderismo', nombre: 'Senderismo', icono: '🥾', tipo: 'run' },
   { id: 'ciclismo', nombre: 'Ciclismo', icono: '🚴', tipo: 'bike' },
@@ -11,7 +12,12 @@ export const deportes = [
   { id: 'gimnasia', nombre: 'Gimnasia', icono: '🤸', tipo: 'strength' },
   { id: 'yoga', nombre: 'Yoga', icono: '🧘', tipo: 'strength' },
   { id: 'halterofilia', nombre: 'Halterofilia', icono: '🏋️', tipo: 'strength' },
-  { id: 'artes_marciales', nombre: 'Artes marciales', icono: '🥋', tipo: 'strength' },
+  {
+    id: 'artes_marciales',
+    nombre: 'Artes marciales',
+    icono: '🥋',
+    tipo: 'strength',
+  },
   { id: 'esqui', nombre: 'Esquí', icono: '⛷️', tipo: 'sport' },
   { id: 'surf', nombre: 'Surf', icono: '🏄', tipo: 'sport' },
   { id: 'remo', nombre: 'Remo', icono: '🚣', tipo: 'sport' },

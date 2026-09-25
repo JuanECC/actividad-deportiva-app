@@ -1,3 +1,5 @@
+> Documento histórico del equipo. El estado funcional actual está en [REPARACIONES.md](../../docs/REPARACIONES.md).
+
 # 📋 Acuerdos de Trabajo - Actividad Deportiva App
 
 ## 👥 Equipo
